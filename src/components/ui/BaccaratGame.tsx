@@ -78,7 +78,7 @@ export function BaccaratGame() {
         else setBankerCards((h) => [...h, step.card])
       }, () => {
         const returned = baccaratPayout(side, result.winner, bet)
-        if (returned > 0) addBalance(returned)
+        if (returned > 0) addBalance(returned, returned > bet)
         setLastDelta(returned - bet)
         const winnerLabel =
           result.winner === 'tie' ? 'Tie!' : result.winner === 'player' ? 'Player wins' : 'Banker wins'

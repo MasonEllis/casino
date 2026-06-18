@@ -6,6 +6,7 @@ import { RouletteTable } from './components/scene/RouletteTable'
 import { CrapsCorner } from './components/scene/CrapsCorner'
 import { CardTable } from './components/scene/CardTable'
 import { Player } from './components/scene/Player'
+import { AudioManager } from './components/ui/AudioManager'
 import { HUD } from './components/ui/HUD'
 import { MobileControls } from './components/ui/MobileControls'
 import { useIsMobile } from './hooks/useIsMobile'
@@ -52,6 +53,7 @@ export default function App() {
         </Canvas>
       </div>
 
+      <AudioManager />
       <HUD />
       <MobileControls />
       {activeGame?.type === 'blackjack' && <BlackjackGame />}

@@ -67,7 +67,7 @@ export function CrapsGame() {
 
   const settle = (outcome: 'win' | 'lose' | 'push') => {
     if (outcome === 'win') {
-      addBalance(bet * 2)
+      addBalance(bet * 2, true)
       setLastDelta(bet)
       setMessage(betType === 'pass' ? 'Winner! Pass line pays' : "Winner! Don't pass pays")
     } else if (outcome === 'push') {

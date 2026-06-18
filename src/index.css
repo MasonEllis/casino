@@ -58,10 +58,17 @@ kbd {
 
 /* ---------- HUD ---------- */
 
-.hud-balance {
+.hud-topbar {
   position: fixed;
   top: max(18px, env(safe-area-inset-top));
   left: max(18px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.hud-balance {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -73,8 +80,24 @@ kbd {
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--gold-bright);
-  z-index: 10;
   pointer-events: none;
+}
+
+.hud-audio {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--gold-bright);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.hud-audio:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 }
 
 .hud-chip {
@@ -1331,14 +1354,10 @@ kbd {
 }
 
 .crash-message {
-  position: absolute;
-  bottom: 22px;
-  left: 0;
-  right: 0;
   text-align: center;
   font-size: 1.05rem;
   min-height: 28px;
-  z-index: 4;
+  padding: 12px 16px 0;
   pointer-events: none;
 }
 

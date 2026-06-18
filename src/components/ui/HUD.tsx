@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { isMuted, toggleMuted } from '../../game/audio'
 import { useCasino } from '../../game/store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
@@ -11,6 +12,7 @@ export function HUD() {
   const isMobile = useIsMobile()
   const [locked, setLocked] = useState(false)
   const [showStart, setShowStart] = useState(false)
+  const [muted, setMuted] = useState(isMuted)
 
   const inWorld = isMobile ? floorEntered : locked
 
@@ -31,9 +33,20 @@ export function HUD() {
 
   return (
     <>
-      <div className="hud-balance">
-        <span className="hud-chip" />
-        <span>{balance.toLocaleString()}</span>
+      <div className="hud-topbar">
+        <div className="hud-balance">
+          <span className="hud-chip" />
+          <span>{balance.toLocaleString()}</span>
+        </div>
+        <button
+          type="button"
+          className="hud-audio"
+          aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+          title={muted ? 'Unmute' : 'Mute'}
+          onClick={() => setMuted(toggleMuted())}
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
       </div>
 
       {inWorld && !activeGame && <div className="hud-crosshair" />}

@@ -57,7 +57,7 @@ export function CrashGame() {
     const m = multiplierRef.current
     const b = betRef.current
     const payout = calcPayout(b, m)
-    addBalance(payout)
+    addBalance(payout, payout > b)
     setCashOutAt(m)
     setLastDelta(payout - b)
     setPhase('cashed_out')
@@ -176,27 +176,28 @@ export function CrashGame() {
               )}
             </div>
 
-            {phase === 'crashed' && (
-              <div className="crash-message lose">
-                Rocket exploded! You lost {bet} chips.
-              </div>
-            )}
-            {phase === 'cashed_out' && cashOutAt && (
-              <div className="crash-message win">
-                Cashed out at {formatMultiplier(cashOutAt)} — +{lastDelta} chips
-              </div>
-            )}
-            {phase === 'betting' && (
-              <div className="crash-message hint">
-                Place your bet and launch. Cash out before the rocket explodes!
-              </div>
-            )}
-            {phase === 'flying' && (
-              <div className="crash-message hint">
-                Cash out now or risk it all…
-              </div>
-            )}
           </div>
+
+          {phase === 'crashed' && (
+            <div className="crash-message lose">
+              Rocket exploded! You lost {bet} chips.
+            </div>
+          )}
+          {phase === 'cashed_out' && cashOutAt && (
+            <div className="crash-message win">
+              Cashed out at {formatMultiplier(cashOutAt)} — +{lastDelta} chips
+            </div>
+          )}
+          {phase === 'betting' && (
+            <div className="crash-message hint">
+              Place your bet and launch. Cash out before the rocket explodes!
+            </div>
+          )}
+          {phase === 'flying' && (
+            <div className="crash-message hint">
+              Cash out now or risk it all…
+            </div>
+          )}
         </div>
 
         <div className="game-footer">

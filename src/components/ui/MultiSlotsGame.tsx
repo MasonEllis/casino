@@ -107,7 +107,7 @@ export function MultiSlotsGame() {
           const { wins: lineWins, total } = evaluateLines(result, variant, betPerLine)
           setWins(lineWins)
           if (total > 0) {
-            addBalance(total)
+            addBalance(total, true)
             setLastWin(total)
             setMessage(
               lineWins.length === 1

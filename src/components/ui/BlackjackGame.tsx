@@ -62,7 +62,7 @@ export function BlackjackGame() {
     (playerHand: Card[], dealerHand: Card[], wager: number) => {
       const outcome: Outcome = isBust(playerHand) ? 'lose' : settle(playerHand, dealerHand)
       const returned = payout(outcome, wager)
-      if (returned > 0) addBalance(returned)
+      if (returned > 0) addBalance(returned, returned > wager)
       setLastDelta(returned - wager)
       setMessage(isBust(playerHand) ? 'Bust!' : OUTCOME_MESSAGES[outcome])
       setPhase('done')

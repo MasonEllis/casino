@@ -76,7 +76,7 @@ export function SlotsGame() {
           window.clearInterval(flicker)
           const { amount, label } = calcPayout(result, bet)
           if (amount > 0) {
-            addBalance(amount)
+            addBalance(amount, true)
             setLastWin(amount)
             setMessage(label)
           } else {

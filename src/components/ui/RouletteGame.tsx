@@ -84,7 +84,7 @@ export function RouletteGame() {
       setResult(final)
       const returned = settleBets(bets, final)
       if (returned > 0) {
-        addBalance(returned)
+        addBalance(returned, true)
         setLastWin(returned)
         setMessage(`${final} ${numberColor(final)} — you collect ${returned}`)
       } else {

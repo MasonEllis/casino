@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { playWinSound } from './audio'
 import type { SlotVariantId } from './slots'
 
 export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash' | 'atm'
@@ -74,7 +75,7 @@ interface CasinoState {
   openGame: (i: Interactable) => void
   closeGame: () => void
   enterFloor: () => void
-  addBalance: (delta: number) => void
+  addBalance: (delta: number, playWin?: boolean) => void
   resetChips: () => void
   /** re-engage pointer lock; registered by the Player controller */
   lockPointer: () => void
@@ -89,12 +90,14 @@ export const useCasino = create<CasinoState>((set) => ({
   openGame: (i) => set({ activeGame: i }),
   closeGame: () => set({ activeGame: null }),
   enterFloor: () => set({ floorEntered: true }),
-  addBalance: (delta) =>
+  addBalance: (delta, playWin = false) => {
+    if (playWin && delta > 0) playWinSound()
     set((s) => {
       const balance = Math.max(0, s.balance + delta)
       localStorage.setItem(BALANCE_KEY, String(balance))
       return { balance }
-    }),
+    })
+  },
   resetChips: () => {
     localStorage.setItem(BALANCE_KEY, '1000')
     set({ balance: 1000 })

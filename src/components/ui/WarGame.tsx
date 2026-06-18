@@ -54,7 +54,7 @@ export function WarGame() {
   const resolveInitial = (p: Card, d: Card) => {
     const cmp = compareCards(p, d)
     if (cmp === 1) {
-      addBalance(bet * 2)
+      addBalance(bet * 2, true)
       setLastDelta(bet)
       setMessage('You win!')
       setPhase('done')
@@ -106,11 +106,11 @@ export function WarGame() {
   const resolveWar = (p: Card, d: Card) => {
     const cmp = compareCards(p, d)
     if (cmp === 1) {
-      addBalance(bet * 3)
+      addBalance(bet * 3, true)
       setLastDelta(bet)
       setMessage('War won!')
     } else if (cmp === 0) {
-      addBalance(bet * 4)
+      addBalance(bet * 4, true)
       setLastDelta(bet * 2)
       setMessage('Double tie! Bonus payout!')
     } else {

@@ -3,31 +3,44 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { PointerLockControls as PointerLockControlsImpl } from 'three-stdlib'
+import { isCoarsePointer } from '../../game/device'
+import { mobileInput } from '../../game/input'
 import { COLLIDERS, INTERACTABLES, ROOM, useCasino } from '../../game/store'
 
 const WALK_SPEED = 4.5
 const SPRINT_SPEED = 7.5
 const WALL_MARGIN = 1.0
 const PLAYER_RADIUS = 0.45
+const MOBILE_LOOK_SENSITIVITY = 0.009
 
 const forward = new THREE.Vector3()
 const right = new THREE.Vector3()
 const move = new THREE.Vector3()
 const UP = new THREE.Vector3(0, 1, 0)
+const euler = new THREE.Euler(0, 0, 0, 'YXZ')
 
 export function Player() {
   const { camera } = useThree()
   const keys = useRef<Record<string, boolean>>({})
   const controlsRef = useRef<PointerLockControlsImpl>(null)
+  const isMobile = useRef(isCoarsePointer())
+  const yaw = useRef(0)
+  const pitch = useRef(0)
 
   useEffect(() => {
     camera.position.set(0, ROOM.eyeHeight, 10)
     camera.lookAt(0, ROOM.eyeHeight, -1)
+    euler.setFromQuaternion(camera.quaternion, 'YXZ')
+    yaw.current = euler.y
+    pitch.current = euler.x
   }, [camera])
 
-  // let overlays re-lock the pointer from their own click handlers
   useEffect(() => {
-    useCasino.setState({ lockPointer: () => controlsRef.current?.lock() })
+    useCasino.setState({
+      lockPointer: () => {
+        if (!isCoarsePointer()) controlsRef.current?.lock()
+      },
+    })
     return () => useCasino.setState({ lockPointer: () => {} })
   }, [])
 
@@ -37,6 +50,7 @@ export function Player() {
       if (e.code === 'KeyE') {
         const { nearby, activeGame, openGame } = useCasino.getState()
         if (nearby && !activeGame) {
+          e.preventDefault()
           openGame(nearby)
           document.exitPointerLock()
         }
@@ -56,9 +70,25 @@ export function Player() {
   useFrame((_, delta) => {
     const state = useCasino.getState()
     if (state.activeGame) return
+    if (isMobile.current && !state.floorEntered) return
+
+    if (isMobile.current) {
+      yaw.current -= mobileInput.lookX * MOBILE_LOOK_SENSITIVITY
+      pitch.current = THREE.MathUtils.clamp(
+        pitch.current - mobileInput.lookY * MOBILE_LOOK_SENSITIVITY,
+        -1.45,
+        1.45,
+      )
+      euler.set(pitch.current, yaw.current, 0)
+      camera.quaternion.setFromEuler(euler)
+      mobileInput.lookX = 0
+      mobileInput.lookY = 0
+    }
 
     const k = keys.current
-    const speed = k['ShiftLeft'] || k['ShiftRight'] ? SPRINT_SPEED : WALK_SPEED
+    const sprinting =
+      k['ShiftLeft'] || k['ShiftRight'] || (isMobile.current && mobileInput.sprint)
+    const speed = sprinting ? SPRINT_SPEED : WALK_SPEED
 
     camera.getWorldDirection(forward)
     forward.y = 0
@@ -71,19 +101,24 @@ export function Player() {
     if (k['KeyD'] || k['ArrowRight']) move.add(right)
     if (k['KeyA'] || k['ArrowLeft']) move.sub(right)
 
+    if (isMobile.current) {
+      if (Math.abs(mobileInput.moveX) > 0.08 || Math.abs(mobileInput.moveY) > 0.08) {
+        move.add(right.clone().multiplyScalar(mobileInput.moveX))
+        move.add(forward.clone().multiplyScalar(mobileInput.moveY))
+      }
+    }
+
     if (move.lengthSq() > 0) {
       move.normalize().multiplyScalar(speed * Math.min(delta, 0.1))
       camera.position.add(move)
     }
 
-    // wall clamp
     const maxX = ROOM.halfWidth - WALL_MARGIN
     const maxZ = ROOM.halfDepth - WALL_MARGIN
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, -maxX, maxX)
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, -maxZ, maxZ)
     camera.position.y = ROOM.eyeHeight
 
-    // push out of obstacle circles
     for (const c of COLLIDERS) {
       const dx = camera.position.x - c.x
       const dz = camera.position.z - c.z
@@ -96,7 +131,6 @@ export function Player() {
       }
     }
 
-    // proximity detection for interactables
     let closest = null
     let closestDist = Infinity
     for (const i of INTERACTABLES) {
@@ -113,7 +147,7 @@ export function Player() {
     }
   })
 
-  // The selector restricts drei's lock-on-click handler to the 3D viewport
-  // wrapper, so clicks inside game overlays never re-lock the pointer.
+  if (isMobile.current) return null
+
   return <PointerLockControls ref={controlsRef} selector="#world" />
 }

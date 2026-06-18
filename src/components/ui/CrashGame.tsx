@@ -116,10 +116,10 @@ export function CrashGame() {
   }
 
   const rocketHeight = phase === 'flying' || phase === 'cashed_out'
-    ? Math.min(12 + Math.log(multiplier) * 28, 88)
+    ? Math.min(10 + Math.log(multiplier) * 24, 48)
     : phase === 'crashed'
-      ? Math.min(12 + Math.log(crashPoint) * 28, 88)
-      : 12
+      ? Math.min(10 + Math.log(crashPoint) * 24, 48)
+      : 10
 
   const showExplosion = phase === 'crashed'
 

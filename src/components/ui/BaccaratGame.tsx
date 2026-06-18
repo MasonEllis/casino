@@ -5,8 +5,8 @@ import {
   baccaratValue,
   dealRound,
   type BaccaratBet,
-  type BaccaratRound,
 } from '../../game/baccarat'
+import { baccaratRevealSteps, scheduleCardReveals } from '../../game/dealSequence'
 import { useCasino } from '../../game/store'
 import { PlayingCard } from './PlayingCard'
 
@@ -30,7 +30,8 @@ export function BaccaratGame() {
   const [phase, setPhase] = useState<Phase>('betting')
   const [side, setSide] = useState<BaccaratBet>('player')
   const [bet, setBet] = useState(0)
-  const [round, setRound] = useState<BaccaratRound | null>(null)
+  const [playerCards, setPlayerCards] = useState<Card[]>([])
+  const [bankerCards, setBankerCards] = useState<Card[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [lastDelta, setLastDelta] = useState(0)
   const timers = useRef<number[]>([])
@@ -65,40 +66,49 @@ export function BaccaratGame() {
   const deal = () => {
     if (bet <= 0 || phase !== 'betting') return
     const result = dealRound(draw)
-    setRound(result)
+    setPlayerCards([])
+    setBankerCards([])
     setPhase('dealing')
     setMessage(null)
 
-    const t = window.setTimeout(() => {
-      const returned = baccaratPayout(side, result.winner, bet)
-      if (returned > 0) addBalance(returned)
-      setLastDelta(returned - bet)
-      const winnerLabel =
-        result.winner === 'tie' ? 'Tie!' : result.winner === 'player' ? 'Player wins' : 'Banker wins'
-      const pushed = result.winner === 'tie' && side !== 'tie'
-      setMessage(pushed ? `${winnerLabel} — bet pushed` : winnerLabel)
-      setPhase('done')
-    }, 900)
-    timers.current.push(t)
+    const steps = baccaratRevealSteps(result.player, result.banker)
+    timers.current.push(
+      ...scheduleCardReveals(steps, (step) => {
+        if (step.hand === 'player') setPlayerCards((h) => [...h, step.card])
+        else setBankerCards((h) => [...h, step.card])
+      }, () => {
+        const returned = baccaratPayout(side, result.winner, bet)
+        if (returned > 0) addBalance(returned)
+        setLastDelta(returned - bet)
+        const winnerLabel =
+          result.winner === 'tie' ? 'Tie!' : result.winner === 'player' ? 'Player wins' : 'Banker wins'
+        const pushed = result.winner === 'tie' && side !== 'tie'
+        setMessage(pushed ? `${winnerLabel} — bet pushed` : winnerLabel)
+        setPhase('done')
+      }),
+    )
   }
 
   const newRound = () => {
+    timers.current.forEach((t) => window.clearTimeout(t))
+    timers.current = []
     setPhase('betting')
     setBet(0)
-    setRound(null)
+    setPlayerCards([])
+    setBankerCards([])
     setMessage(null)
     setLastDelta(0)
   }
 
-  const hand = (label: string, cards: Card[] | undefined) => (
+  const hand = (label: string, cards: Card[]) => (
     <div className="bj-hand">
       <div className="bj-hand-label">
         {label}
-        {cards && cards.length > 0 && <span className="bj-total">{baccaratValue(cards)}</span>}
+        {cards.length > 0 && <span className="bj-total">{baccaratValue(cards)}</span>}
       </div>
       <div className="bj-cards">
-        {cards?.map((c, i) => <PlayingCard key={i} card={c} />)}
-        {(!cards || cards.length === 0) && <div className="card card-slot" />}
+        {cards.map((c, i) => <PlayingCard key={i} card={c} />)}
+        {cards.length === 0 && <div className="card card-slot" />}
       </div>
     </div>
   )
@@ -114,7 +124,27 @@ export function BaccaratGame() {
         </div>
 
         <div className="bj-table baccarat-felt">
-          {hand('Banker', round?.banker)}
+          {hand('Banker', bankerCards)}
+
+          {phase === 'betting' && (
+            <div className="baccarat-spots">
+              {(Object.keys(SIDE_LABELS) as BaccaratBet[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`baccarat-spot baccarat-spot--${s} ${side === s ? 'selected' : ''}`}
+                  onClick={() => setSide(s)}
+                >
+                  <span className="baccarat-spot-name">
+                    {s === 'tie' ? 'Tie' : s === 'player' ? 'Player' : 'Banker'}
+                  </span>
+                  <span className="baccarat-spot-odds">
+                    {s === 'tie' ? '8:1' : s === 'player' ? '1:1' : '0.95:1'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {message && (
             <div className={`bj-result ${lastDelta > 0 ? 'win' : lastDelta < 0 ? 'lose' : ''}`}>
@@ -125,7 +155,7 @@ export function BaccaratGame() {
             </div>
           )}
 
-          {hand('Player', round?.player)}
+          {hand('Player', playerCards)}
         </div>
 
         <div className="game-footer">

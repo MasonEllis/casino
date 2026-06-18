@@ -1,0 +1,129 @@
+---
+pid: 25648
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; node scripts/gen-curb-youtube.mjs"
+started_at: 2026-06-18T03:22:53.537Z
+running_for_ms: 1280010  
+---
+[1/120] The Pants Tent… n62ZjsVfwV4
+[2/120] Ted and Mary… OcvEW_WdkM0
+[3/120] Porno Gil… i9aAmv8F1F0
+[4/120] The Bracelet… GCU0lG9sRWA
+[5/120] Interior Decorator… UM8m0d31GpA
+[6/120] The Wire… bTZkH52Dwjc
+[7/120] AAMCO… 9-Rr5wetbNI
+[8/120] Beloved Aunt… f1nHVU1Qe4I
+[9/120] Affirmative Action… WwgAkkdiFNI
+[10/120] The Group… 5BTh7g0hJ0o
+[11/120] The Car Salesman… error: fetch failed
+[12/120] Thor… error: fetch failed
+[13/120] Trick or Treat… error: fetch failed
+[14/120] The Shrimp Incident… error: fetch failed
+[15/120] The Thong… error: fetch failed
+[16/120] The Acupuncturist… error: fetch failed
+[17/120] The Doll… error: fetch failed
+[18/120] Shaq… error: fetch failed
+[19/120] The Baptism… error: fetch failed
+[20/120] The Massage… error: fetch failed
+[21/120] Chet's Shirt… error: fetch failed
+[22/120] The Benadryl Brownie… error: fetch failed
+[23/120] Club Soda and Salt… error: fetch failed
+[24/120] The Nanny from Hell… error: fetch failed
+[25/120] The Terrorist Attack… error: fetch failed
+[26/120] The Special Section… error: fetch failed
+[27/120] The Corpse-Sniffing Dog… error: fetch failed
+[28/120] Krazee-Eyez Killa… error: fetch failed
+[29/120] Mary, Joseph and Larry… error: fetch failed
+[30/120] The Grand Opening… error: fetch failed
+[31/120] Mel's Offer… error: fetch failed
+[32/120] Ben's Birthday Party… error: fetch failed
+[33/120] The Blind Date… error: fetch failed
+[34/120] The Weatherman… error: fetch failed
+[35/120] The 5 Wood… error: fetch failed
+[36/120] The Car Pool Lane… error: fetch failed
+[37/120] The Surrogate… error: fetch failed
+[38/120] Wandering Bear… error: fetch failed
+[39/120] The Survivor… error: fetch failed
+[40/120] Opening Night… error: fetch failed
+[41/120] The Larry David Sandwich… error: fetch failed
+[42/120] The Bowtie… error: fetch failed
+[43/120] The Christ Nail… error: fetch failed
+[44/120] Kamikaze Bingo… error: fetch failed
+[45/120] Lewis Needs a Kidney… error: fetch failed
+[46/120] The Smoking Jacket… error: fetch failed
+[47/120] The Seder… error: fetch failed
+[48/120] The Ski Lift… error: fetch failed
+[49/120] The Korean Bookie… error: fetch failed
+[50/120] The End… error: fetch failed
+[51/120] Meet The Blacks… error: fetch failed
+[52/120] The Anonymous Donor… error: fetch failed
+[53/120] The Ida Funkhouser Roadside Memorial… error: fetch failed
+[54/120] The Lefty Call… error: fetch failed
+[55/120] The Freak Book… error: fetch failed
+[56/120] The Rat Dog… error: fetch failed
+[57/120] The TiVo Guy… error: fetch failed
+[58/120] The N Word… error: fetch failed
+[59/120] The Therapist… error: fetch failed
+[60/120] The Bat Mitzvah… error: fetch failed
+[61/120] Funkhouser's Crazy Sister… error: fetch failed
+[62/120] Vehicular Fellatio… error: fetch failed
+[63/120] The Reunion… error: fetch failed
+[64/120] The Hot Towel… error: fetch failed
+[65/120] Denise Handicapped… error: fetch failed
+[66/120] The Bare Midriff… error: fetch failed
+[67/120] The Black Swan… error: fetch failed
+[68/120] Officer Krupke… error: fetch failed
+[69/120] The Table Read… error: fetch failed
+[70/120] Seinfeld… error: fetch failed
+[71/120] The Divorce… error: fetch failed
+[72/120] The Safe House… error: fetch failed
+[73/120] Palestinian Chicken… error: fetch failed
+[74/120] The Smiley Face… error: fetch failed
+[75/120] Vow of Silence… error: fetch failed
+[76/120] The Hero… error: fetch failed
+[77/120] The Bi-Sexual… error: fetch failed
+[78/120] Car Periscope… error: fetch failed
+[79/120] Mister Softee… error: fetch failed
+[80/120] Larry vs. Michael J. Fox… error: fetch failed
+[81/120] Foisted!… error: fetch failed
+[82/120] The Pickle Gambit… error: fetch failed
+[83/120] A Disturbance in the Kitchen… error: fetch failed
+[84/120] Running with the Bulls… error: fetch failed
+[85/120] Thank You for Your Service… error: fetch failed
+[86/120] The Accidental Text on Purpose… error: fetch failed
+[87/120] Namaste… error: fetch failed
+[88/120] Never Wait for Seconds!… error: fetch failed
+[89/120] The Shucker… error: fetch failed
+[90/120] Fatwa!… error: fetch failed
+[91/120] Happy New Year… error: fetch failed
+[92/120] Side Sitting… error: fetch failed
+[93/120] Artificial Fruit… error: fetch failed
+[94/120] You're Not Going to Get Me to Say Anything Bad About Mickey… error: fetch failed
+[95/120] Insufficient Praise… error: fetch failed
+[96/120] The Surprise Party… error: fetch failed
+[97/120] The Ugly Section… error: fetch failed
+[98/120] Elizabeth, Margaret and Larry… error: fetch failed
+[99/120] Beep Panic… error: fetch failed
+[100/120] The Spite Store… error: fetch failed
+[101/120] The Five-Foot Fence… error: fetch failed
+[102/120] Angel Muffin… error: fetch failed
+[103/120] The Mini Bar… error: fetch failed
+[104/120] The Watermelon… error: fetch failed
+[105/120] IRASSHAIMASE!… error: fetch failed
+[106/120] Man Fights Tiny Woman… error: fetch failed
+[107/120] Irma Kostroski… error: fetch failed
+[108/120] What Have I Done?… error: fetch failed
+[109/120] Igor, Gregor, & Timor… error: fetch failed
+[110/120] The Mormon Advantage… error: fetch failed
+[111/120] Atlanta… error: fetch failed
+[112/120] The Lawn Jockey… error: fetch failed
+[113/120] Vertical Drop, Horizontal Tug… error: fetch failed
+[114/120] Disgruntled… error: fetch failed
+[115/120] Fish Stuck… error: fetch failed
+[116/120] The Gettysburg Address… error: fetch failed
+[117/120] The Dream Scheme… error: fetch failed
+[118/120] The Colostomy Bag… error: fetch failed
+[119/120] Ken/Kendra… error: fetch failed
+[120/120] No Lessons Learned… error: fetch failed
+
+wrote 10 clips (110 failed)

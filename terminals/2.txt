@@ -1,0 +1,19 @@
+---
+pid: 5784
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; node scripts/gen-curb-youtube.mjs"
+started_at: 2026-06-18T03:30:15.534Z
+running_for_ms: 1135003  
+---
+undefined:2
+  'the-pants-tent': 'n62ZjsVfwV4',
+  ^
+
+SyntaxError: Expected property name or '}' in JSON at position 4 (line 2 column 3)
+    at JSON.parse (<anonymous>)
+    at file:///C:/Users/mason/source/repos/personal/playground/casino/scripts/gen-curb-youtube.mjs:13:46
+    at ModuleJob.run (node:internal/modules/esm/module_job:272:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:580:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:98:5)
+
+Node.js v23.6.1

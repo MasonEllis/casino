@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { SlotVariantId } from './slots'
 
-export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash'
+export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash' | 'atm'
 
 export interface Interactable {
   id: string
@@ -40,6 +40,7 @@ export const INTERACTABLES: Interactable[] = [
   { id: 'baccarat-1', type: 'baccarat', label: 'Baccarat', position: [-6, 0, 3], rotationY: 0.7, interactRadius: 3.2, collideRadius: 2.0 },
   { id: 'war-1', type: 'war', label: 'Casino War', position: [6, 0, 3], rotationY: -0.7, interactRadius: 3.2, collideRadius: 2.0 },
   { id: 'crash-1', type: 'crash', label: 'Rocket Crash', position: [-3, 0, 12], rotationY: Math.PI, interactRadius: 3.0, collideRadius: 1.5 },
+  { id: 'atm-1', type: 'atm', label: 'Curb ATM', position: [-17, 0, 8], rotationY: Math.PI / 2, interactRadius: 2.6, collideRadius: 0.8 },
 ]
 
 export const COLUMN_POSITIONS: [number, number][] = [
@@ -67,9 +68,12 @@ interface CasinoState {
   balance: number
   activeGame: Interactable | null
   nearby: Interactable | null
+  /** touch/mobile: player has entered the floor (replaces pointer lock) */
+  floorEntered: boolean
   setNearby: (i: Interactable | null) => void
   openGame: (i: Interactable) => void
   closeGame: () => void
+  enterFloor: () => void
   addBalance: (delta: number) => void
   resetChips: () => void
   /** re-engage pointer lock; registered by the Player controller */
@@ -80,9 +84,11 @@ export const useCasino = create<CasinoState>((set) => ({
   balance: loadBalance(),
   activeGame: null,
   nearby: null,
+  floorEntered: false,
   setNearby: (i) => set({ nearby: i }),
   openGame: (i) => set({ activeGame: i }),
   closeGame: () => set({ activeGame: null }),
+  enterFloor: () => set({ floorEntered: true }),
   addBalance: (delta) =>
     set((s) => {
       const balance = Math.max(0, s.balance + delta)

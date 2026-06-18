@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { playReelStopSound, startReelSpinSound, stopReelSpinSound } from '../../game/audio'
 import {
   SLOT_VARIANTS,
   SYMBOLS,
@@ -40,7 +41,10 @@ export function MultiSlotsGame() {
 
   useEffect(() => {
     const pending = timers.current
-    return () => pending.forEach((t) => window.clearTimeout(t))
+    return () => {
+      pending.forEach((t) => window.clearTimeout(t))
+      stopReelSpinSound()
+    }
   }, [])
 
   const leave = useCallback(() => {
@@ -77,6 +81,7 @@ export function MultiSlotsGame() {
     setLastWin(0)
     spinningRef.current = Array(variant.reels).fill(true)
     setSpinningReels(Array(variant.reels).fill(true))
+    startReelSpinSound()
 
     const result = spinGrid(variant.reels, variant.rows)
 
@@ -92,6 +97,7 @@ export function MultiSlotsGame() {
     for (let r = 0; r < variant.reels; r++) {
       const stop = window.setTimeout(() => {
         spinningRef.current[r] = false
+        playReelStopSound()
         setGrid((g) => {
           const next = [...g]
           next[r] = result[r]
@@ -103,6 +109,7 @@ export function MultiSlotsGame() {
           return next
         })
         if (r === variant.reels - 1) {
+          stopReelSpinSound()
           window.clearInterval(flicker)
           const { wins: lineWins, total } = evaluateLines(result, variant, betPerLine)
           setWins(lineWins)
@@ -194,23 +201,28 @@ export function MultiSlotsGame() {
             </div>
           </div>
 
-          <div className="paytable">
-            <h3>Paytable (per line)</h3>
-            <ul>
+          <div className="paytable paytable--multi">
+            <h3>
+              Paytable
+              <span className="paytable-sub">per line</span>
+            </h3>
+            <div className="paytable-grid paytable-grid--multi">
+              <span className="paytable-head" />
+              <span className="paytable-head">3×</span>
+              <span className="paytable-head">4×</span>
+              <span className="paytable-head">5×</span>
               {[...SYMBOLS].reverse().map((s) => (
-                <li key={s.id}>
-                  <span className="pay-glyphs">{s.glyph}</span>
-                  <span className="pay-mult ms-runs">
-                    {s.runPays.map((p, i) => (
-                      <span key={i}>
-                        {i + 3}×&hairsp;{p}
-                      </span>
-                    ))}
+                <div className="paytable-row" key={s.id}>
+                  <span className="paytable-symbol" aria-label={s.name} title={s.name}>
+                    {s.glyph}
                   </span>
-                </li>
+                  {s.runPays.map((p, i) => (
+                    <span key={i} className="paytable-val">{p}</span>
+                  ))}
+                </div>
               ))}
-            </ul>
-            <p className="ms-note">Runs pay left to right, 3+ in a row on a payline.</p>
+            </div>
+            <p className="ms-note">Left to right on a payline</p>
           </div>
         </div>
       </div>

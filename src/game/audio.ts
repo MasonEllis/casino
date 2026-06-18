@@ -15,6 +15,12 @@ let ctx: AudioContext | null = null
 let musicGain: GainNode | null = null
 let sfxGain: GainNode | null = null
 let musicTimer: ReturnType<typeof setInterval> | null = null
+let reelSpinTimer: ReturnType<typeof setInterval> | null = null
+let rocketNoise: AudioBufferSourceNode | null = null
+let rocketGain: GainNode | null = null
+let rocketFilter: BiquadFilterNode | null = null
+let rocketLfo: OscillatorNode | null = null
+let rocketSub: OscillatorNode | null = null
 let chordIndex = 0
 let musicStarted = false
 let muted = false
@@ -51,6 +57,10 @@ export function setMuted(next: boolean) {
   localStorage.setItem('casino-muted', String(next))
   if (musicGain) musicGain.gain.value = next ? 0 : MUSIC_VOL
   if (sfxGain) sfxGain.gain.value = next ? 0 : SFX_VOL
+  if (next) {
+    stopReelSpinSound()
+    stopRocketSound()
+  }
 }
 
 export function toggleMuted() {
@@ -105,6 +115,203 @@ export function stopBackgroundMusic() {
   if (musicTimer) clearInterval(musicTimer)
   musicTimer = null
   musicStarted = false
+}
+
+function playFilteredNoise(
+  duration: number,
+  volume: number,
+  freq: number,
+  q = 1.2,
+  type: BiquadFilterType = 'bandpass',
+) {
+  if (muted || !sfxGain) return
+  const c = getCtx()
+  const now = c.currentTime
+  const samples = Math.floor(c.sampleRate * duration)
+  const buffer = c.createBuffer(1, samples, c.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < samples; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (samples * 0.2))
+  }
+  const src = c.createBufferSource()
+  src.buffer = buffer
+  const filter = c.createBiquadFilter()
+  filter.type = type
+  filter.frequency.value = freq
+  filter.Q.value = q
+  const gain = c.createGain()
+  gain.gain.setValueAtTime(volume, now)
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration)
+  src.connect(filter)
+  filter.connect(gain)
+  gain.connect(sfxGain)
+  src.start(now)
+  src.stop(now + duration + 0.01)
+}
+
+function playReelTick() {
+  playFilteredNoise(0.018, 0.14, 1600 + Math.random() * 500, 0.9)
+}
+
+export function startReelSpinSound(intervalMs = 70) {
+  if (muted) return
+  stopReelSpinSound()
+  ensureGains()
+  void resumeAudio()
+  playReelTick()
+  reelSpinTimer = setInterval(playReelTick, intervalMs)
+}
+
+export function stopReelSpinSound() {
+  if (reelSpinTimer) clearInterval(reelSpinTimer)
+  reelSpinTimer = null
+}
+
+export function playCardDealSound() {
+  if (muted) return
+  ensureGains()
+  void resumeAudio()
+  const c = getCtx()
+  const now = c.currentTime
+
+  playFilteredNoise(0.055, 0.11, 2200 + Math.random() * 800, 1.2, 'highpass')
+
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(115 + Math.random() * 35, now + 0.01)
+  osc.frequency.exponentialRampToValueAtTime(55, now + 0.05)
+  osc.connect(gain)
+  gain.connect(sfxGain!)
+  gain.gain.setValueAtTime(0, now)
+  gain.gain.linearRampToValueAtTime(0.22, now + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06)
+  osc.start(now + 0.01)
+  osc.stop(now + 0.065)
+}
+
+export function playReelStopSound() {
+  if (muted) return
+  ensureGains()
+  void resumeAudio()
+  const c = getCtx()
+  const now = c.currentTime
+
+  playFilteredNoise(0.04, 0.2, 620, 1.4, 'lowpass')
+
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(180, now)
+  osc.frequency.exponentialRampToValueAtTime(90, now + 0.06)
+  osc.connect(gain)
+  gain.connect(sfxGain!)
+  gain.gain.setValueAtTime(0.28, now)
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08)
+  osc.start(now)
+  osc.stop(now + 0.09)
+}
+
+export function startRocketSound() {
+  if (muted || rocketNoise) return
+  stopRocketSound()
+  ensureGains()
+  void resumeAudio()
+  const c = getCtx()
+  const now = c.currentTime
+
+  const bufferSize = c.sampleRate * 2
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
+
+  rocketNoise = c.createBufferSource()
+  rocketNoise.buffer = buffer
+  rocketNoise.loop = true
+
+  rocketFilter = c.createBiquadFilter()
+  rocketFilter.type = 'lowpass'
+  rocketFilter.frequency.value = 520
+  rocketFilter.Q.value = 0.7
+
+  rocketGain = c.createGain()
+  rocketGain.gain.setValueAtTime(0, now)
+  rocketGain.gain.linearRampToValueAtTime(0.22, now + 0.2)
+
+  rocketNoise.connect(rocketFilter)
+  rocketFilter.connect(rocketGain)
+  rocketGain.connect(sfxGain!)
+
+  rocketLfo = c.createOscillator()
+  rocketLfo.type = 'sine'
+  rocketLfo.frequency.value = 11
+  const lfoDepth = c.createGain()
+  lfoDepth.gain.value = 180
+  rocketLfo.connect(lfoDepth)
+  lfoDepth.connect(rocketFilter.frequency)
+
+  rocketSub = c.createOscillator()
+  rocketSub.type = 'sawtooth'
+  rocketSub.frequency.value = 52
+  const subFilter = c.createBiquadFilter()
+  subFilter.type = 'lowpass'
+  subFilter.frequency.value = 140
+  const subGain = c.createGain()
+  subGain.gain.value = 0.06
+  rocketSub.connect(subFilter)
+  subFilter.connect(subGain)
+  subGain.connect(sfxGain!)
+
+  rocketNoise.start(now)
+  rocketLfo.start(now)
+  rocketSub.start(now)
+}
+
+export function stopRocketSound() {
+  if (!rocketGain) return
+  const c = getCtx()
+  const now = c.currentTime
+  rocketGain.gain.cancelScheduledValues(now)
+  rocketGain.gain.setValueAtTime(rocketGain.gain.value, now)
+  rocketGain.gain.linearRampToValueAtTime(0, now + 0.15)
+
+  const noise = rocketNoise
+  const lfo = rocketLfo
+  const sub = rocketSub
+  rocketNoise = null
+  rocketGain = null
+  rocketFilter = null
+  rocketLfo = null
+  rocketSub = null
+
+  window.setTimeout(() => {
+    try { noise?.stop() } catch { /* already stopped */ }
+    try { lfo?.stop() } catch { /* already stopped */ }
+    try { sub?.stop() } catch { /* already stopped */ }
+  }, 180)
+}
+
+export function playRocketExplosionSound() {
+  if (muted) return
+  ensureGains()
+  void resumeAudio()
+  const c = getCtx()
+  const now = c.currentTime
+
+  playFilteredNoise(0.35, 0.42, 220, 0.6, 'lowpass')
+  playFilteredNoise(0.2, 0.3, 900, 1.1, 'bandpass')
+
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sawtooth'
+  osc.frequency.setValueAtTime(110, now)
+  osc.frequency.exponentialRampToValueAtTime(28, now + 0.25)
+  osc.connect(gain)
+  gain.connect(sfxGain!)
+  gain.gain.setValueAtTime(0.35, now)
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
+  osc.start(now)
+  osc.stop(now + 0.32)
 }
 
 export function playWinSound() {

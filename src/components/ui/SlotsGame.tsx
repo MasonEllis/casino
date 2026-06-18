@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { playReelStopSound, startReelSpinSound, stopReelSpinSound } from '../../game/audio'
 import { SYMBOLS, randomSymbol, spinReels, calcPayout, type SlotSymbol } from '../../game/slots'
 import { useCasino } from '../../game/store'
 
@@ -32,7 +33,10 @@ export function SlotsGame() {
 
   useEffect(() => {
     const pending = timers.current
-    return () => pending.forEach((t) => window.clearTimeout(t))
+    return () => {
+      pending.forEach((t) => window.clearTimeout(t))
+      stopReelSpinSound()
+    }
   }, [])
 
   useEffect(() => {
@@ -50,6 +54,7 @@ export function SlotsGame() {
     setLastWin(0)
     spinningRef.current = [true, true, true]
     setSpinning([true, true, true])
+    startReelSpinSound()
 
     const result = spinReels()
 
@@ -62,6 +67,7 @@ export function SlotsGame() {
     result.forEach((symbol, i) => {
       const stop = window.setTimeout(() => {
         spinningRef.current[i] = false
+        playReelStopSound()
         setDisplay((d) => {
           const next = [...d]
           next[i] = symbol
@@ -73,6 +79,7 @@ export function SlotsGame() {
           return next
         })
         if (i === result.length - 1) {
+          stopReelSpinSound()
           window.clearInterval(flicker)
           const { amount, label } = calcPayout(result, bet)
           if (amount > 0) {
@@ -141,24 +148,28 @@ export function SlotsGame() {
             </div>
           </div>
 
-          <div className="paytable">
+          <div className="paytable paytable--classic">
             <h3>Paytable</h3>
-            <ul>
+            <div className="paytable-grid paytable-grid--classic">
+              <span className="paytable-head">Match</span>
+              <span className="paytable-head paytable-head-right">Pays</span>
               {[...SYMBOLS].reverse().map((s) => (
-                <li key={s.id}>
-                  <span className="pay-glyphs">{s.glyph}{s.glyph}{s.glyph}</span>
-                  <span className="pay-mult">{s.triple}x</span>
-                </li>
+                <div className="paytable-row" key={s.id}>
+                  <span className="paytable-glyphs" aria-label={s.name}>
+                    {s.glyph}{s.glyph}{s.glyph}
+                  </span>
+                  <span className="paytable-val">{s.triple}×</span>
+                </div>
               ))}
-              <li>
-                <span className="pay-glyphs">🍒🍒</span>
-                <span className="pay-mult">3x</span>
-              </li>
-              <li>
-                <span className="pay-glyphs">🍒</span>
-                <span className="pay-mult">1x</span>
-              </li>
-            </ul>
+              <div className="paytable-row">
+                <span className="paytable-glyphs" aria-label="Two cherries">🍒🍒</span>
+                <span className="paytable-val">3×</span>
+              </div>
+              <div className="paytable-row">
+                <span className="paytable-glyphs" aria-label="One cherry">🍒</span>
+                <span className="paytable-val">1×</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

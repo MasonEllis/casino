@@ -1,3 +1,4 @@
+import { playCardDealSound } from './audio'
 import type { Card } from './blackjack'
 
 export const CARD_REVEAL_MS = 420
@@ -23,6 +24,7 @@ export function scheduleCardReveals(
   }
   steps.forEach((step, i) => {
     const t = window.setTimeout(() => {
+      playCardDealSound()
       onStep(step)
       if (i === steps.length - 1) onComplete()
     }, delayMs * (i + 1))
@@ -59,6 +61,7 @@ export function revealOne(
   delayMs = CARD_REVEAL_MS,
 ): number {
   return window.setTimeout(() => {
+    playCardDealSound()
     onReveal(hand, card)
     onComplete()
   }, delayMs)

@@ -483,6 +483,19 @@ kbd {
   overflow: hidden;
 }
 
+.bj-player-hands {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.bj-player-hands.bj-split .bj-hand {
+  flex: 1 1 180px;
+  max-width: 240px;
+}
+
 .bj-hand {
   display: flex;
   flex-direction: column;
@@ -490,6 +503,27 @@ kbd {
   gap: 6px;
   width: 100%;
   max-width: 100%;
+}
+
+.bj-hand-active {
+  padding: 6px 8px;
+  border-radius: 10px;
+  outline: 1px solid var(--gold-bright);
+  box-shadow: 0 0 14px rgba(255, 210, 122, 0.25);
+}
+
+.bj-hand-done {
+  opacity: 0.72;
+}
+
+.bj-hand-bet {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--gold-bright);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
 }
 
 .bj-hand-label {
@@ -690,38 +724,116 @@ kbd {
 }
 
 .paytable {
-  width: 200px;
+  flex-shrink: 0;
+  align-self: flex-start;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  padding: 16px 18px;
+  padding: 14px 16px;
+}
+
+.paytable--classic {
+  width: 168px;
+}
+
+.paytable--multi {
+  width: 196px;
 }
 
 .paytable h3 {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   color: var(--gold-bright);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  line-height: 1.3;
 }
 
-.paytable ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.paytable-sub {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: rgba(241, 233, 216, 0.45);
+  text-transform: none;
+  margin-top: 2px;
 }
 
-.paytable li {
+.paytable-grid {
+  display: grid;
+  gap: 1px;
+  padding: 1px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.paytable-grid--classic {
+  grid-template-columns: 1fr 3.25rem;
+}
+
+.paytable-grid--multi {
+  grid-template-columns: 2.5rem repeat(3, 1fr);
+}
+
+.paytable-head,
+.paytable-glyphs,
+.paytable-symbol,
+.paytable-val {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+  padding: 7px 8px;
+  min-height: 2rem;
+  background: rgba(8, 4, 13, 0.92);
 }
 
-.pay-mult {
+.paytable-head {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(241, 233, 216, 0.45);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.paytable-head:first-child {
+  justify-content: flex-start;
+}
+
+.paytable-head-right {
+  justify-content: flex-end;
+}
+
+.paytable-grid--multi .paytable-head:not(:first-child) {
+  justify-content: center;
+}
+
+.paytable-row {
+  display: contents;
+}
+
+.paytable-glyphs {
+  justify-content: flex-start;
+  gap: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.paytable-symbol {
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.paytable-val {
+  justify-content: center;
   color: var(--neon-cyan);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
+}
+
+.paytable-grid--classic .paytable-val {
+  justify-content: flex-end;
 }
 
 /* ---------- multi-line slots ---------- */
@@ -776,16 +888,12 @@ kbd {
   to { box-shadow: 0 0 22px rgba(255, 210, 122, 0.95), inset 0 0 12px rgba(255, 210, 122, 0.5); }
 }
 
-.ms-runs {
-  display: flex;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-
 .ms-note {
-  margin-top: 12px;
-  font-size: 0.8rem;
-  color: rgba(241, 233, 216, 0.55);
+  margin-top: 10px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(241, 233, 216, 0.45);
+  text-align: center;
 }
 
 /* ---------- baccarat / war ---------- */
@@ -1629,7 +1737,8 @@ kbd {
     flex-direction: column;
   }
 
-  .paytable {
+  .paytable--classic,
+  .paytable--multi {
     width: 100%;
   }
 

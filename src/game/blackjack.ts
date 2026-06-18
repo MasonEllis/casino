@@ -50,6 +50,11 @@ export function isBlackjack(hand: Card[]): boolean {
   return hand.length === 2 && handValue(hand).total === 21
 }
 
+/** True when the player may split an initial two-card hand. */
+export function canSplitHand(hand: Card[]): boolean {
+  return hand.length === 2 && hand[0].rank === hand[1].rank
+}
+
 export function isBust(hand: Card[]): boolean {
   return handValue(hand).total > 21
 }
@@ -77,10 +82,10 @@ export function settle(player: Card[], dealer: Card[]): Outcome {
 }
 
 /** Total chips returned to the player for a given outcome (includes the original stake). */
-export function payout(outcome: Outcome, bet: number): number {
+export function payout(outcome: Outcome, bet: number, fromSplit = false): number {
   switch (outcome) {
     case 'blackjack':
-      return Math.floor(bet * 2.5) // 3:2
+      return fromSplit ? bet * 2 : Math.floor(bet * 2.5) // split 21 pays 1:1
     case 'win':
       return bet * 2
     case 'push':

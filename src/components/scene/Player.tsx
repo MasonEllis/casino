@@ -9,6 +9,8 @@ import { COLLIDERS, INTERACTABLES, ROOM, useCasino } from '../../game/store'
 
 const WALK_SPEED = 4.5
 const SPRINT_SPEED = 7.5
+const JUMP_VELOCITY = 5.2
+const GRAVITY = 18
 const WALL_MARGIN = 1.0
 const PLAYER_RADIUS = 0.45
 const MOBILE_LOOK_SENSITIVITY = 0.009
@@ -26,6 +28,9 @@ export function Player() {
   const isMobile = useRef(isCoarsePointer())
   const yaw = useRef(0)
   const pitch = useRef(0)
+  const verticalVelocity = useRef(0)
+  const onGround = useRef(true)
+  const jumpQueued = useRef(false)
 
   useEffect(() => {
     camera.position.set(0, ROOM.eyeHeight, 10)
@@ -47,12 +52,21 @@ export function Player() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keys.current[e.code] = true
+      const { nearby, activeGame, openGame } = useCasino.getState()
       if (e.code === 'KeyE') {
-        const { nearby, activeGame, openGame } = useCasino.getState()
         if (nearby && !activeGame) {
           e.preventDefault()
           openGame(nearby)
           document.exitPointerLock()
+        }
+      }
+      if (e.code === 'Space' && !e.repeat && !activeGame) {
+        const walking = isCoarsePointer()
+          ? useCasino.getState().floorEntered
+          : document.pointerLockElement !== null
+        if (walking) {
+          e.preventDefault()
+          jumpQueued.current = true
         }
       }
     }
@@ -113,11 +127,28 @@ export function Player() {
       camera.position.add(move)
     }
 
+    if (jumpQueued.current && onGround.current) {
+      verticalVelocity.current = JUMP_VELOCITY
+      onGround.current = false
+    }
+    jumpQueued.current = false
+
+    if (!onGround.current) {
+      verticalVelocity.current -= GRAVITY * delta
+      camera.position.y += verticalVelocity.current * delta
+      if (camera.position.y <= ROOM.eyeHeight) {
+        camera.position.y = ROOM.eyeHeight
+        verticalVelocity.current = 0
+        onGround.current = true
+      }
+    } else {
+      camera.position.y = ROOM.eyeHeight
+    }
+
     const maxX = ROOM.halfWidth - WALL_MARGIN
     const maxZ = ROOM.halfDepth - WALL_MARGIN
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, -maxX, maxX)
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, -maxZ, maxZ)
-    camera.position.y = ROOM.eyeHeight
 
     for (const c of COLLIDERS) {
       const dx = camera.position.x - c.x

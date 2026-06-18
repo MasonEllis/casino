@@ -5,6 +5,11 @@ import {
   generateCrashPoint,
   multiplierAt,
 } from '../../game/crash'
+import {
+  playRocketExplosionSound,
+  startRocketSound,
+  stopRocketSound,
+} from '../../game/audio'
 import { useCasino } from '../../game/store'
 
 type Phase = 'betting' | 'flying' | 'crashed' | 'cashed_out'
@@ -75,7 +80,22 @@ export function CrashGame() {
     return () => window.removeEventListener('keydown', onKey)
   }, [leave, cashOut])
 
-  useEffect(() => () => cancelAnimationFrame(raf.current), [])
+  useEffect(() => () => {
+    cancelAnimationFrame(raf.current)
+    stopRocketSound()
+  }, [])
+
+  useEffect(() => {
+    if (phase === 'flying') {
+      startRocketSound()
+      return () => stopRocketSound()
+    }
+    if (phase === 'crashed') {
+      stopRocketSound()
+      playRocketExplosionSound()
+    }
+    if (phase === 'cashed_out') stopRocketSound()
+  }, [phase])
 
   const tick = () => {
     const elapsed = performance.now() - startTime.current

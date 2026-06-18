@@ -7,9 +7,11 @@ import {
   dealerShouldHit,
   settle,
   payout,
+  canSplitHand,
   type Card,
   type Outcome,
 } from '../../game/blackjack'
+import { playCardDealSound } from '../../game/audio'
 import { blackjackInitialSteps, CARD_REVEAL_MS, scheduleCardReveals } from '../../game/dealSequence'
 import { useCasino } from '../../game/store'
 import { PlayingCard } from './PlayingCard'
@@ -31,8 +33,6 @@ export function BlackjackGame() {
   const closeGame = useCasino((s) => s.closeGame)
   const resetChips = useCasino((s) => s.resetChips)
 
-  // re-lock the pointer in the same user gesture so the player walks
-  // straight back onto the floor without the "click to enter" screen
   const leave = useCallback(() => {
     closeGame()
     useCasino.getState().lockPointer()
@@ -41,12 +41,19 @@ export function BlackjackGame() {
   const shoe = useRef<Card[]>(newShoe())
   const [phase, setPhase] = useState<Phase>('betting')
   const [bet, setBet] = useState(0)
-  const [player, setPlayer] = useState<Card[]>([])
+  const [hands, setHands] = useState<Card[][]>([[]])
+  const [handBets, setHandBets] = useState<number[]>([0])
+  const [handFinished, setHandFinished] = useState<boolean[]>([false])
+  const [activeHand, setActiveHand] = useState(0)
+  const [splitPerformed, setSplitPerformed] = useState(false)
   const [dealer, setDealer] = useState<Card[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [lastDelta, setLastDelta] = useState(0)
   const [drawing, setDrawing] = useState(false)
   const timers = useRef<number[]>([])
+
+  const totalWager = handBets.reduce((sum, w) => sum + w, 0)
+  const currentHand = hands[activeHand] ?? []
 
   useEffect(() => {
     const pending = timers.current
@@ -58,16 +65,59 @@ export function BlackjackGame() {
     return shoe.current.pop()!
   }, [])
 
-  const finishHand = useCallback(
-    (playerHand: Card[], dealerHand: Card[], wager: number) => {
-      const outcome: Outcome = isBust(playerHand) ? 'lose' : settle(playerHand, dealerHand)
-      const returned = payout(outcome, wager)
-      if (returned > 0) addBalance(returned, returned > wager)
-      setLastDelta(returned - wager)
-      setMessage(isBust(playerHand) ? 'Bust!' : OUTCOME_MESSAGES[outcome])
+  const finishRound = useCallback(
+    (playerHands: Card[][], dealerHand: Card[], wagers: number[], fromSplit: boolean) => {
+      let totalReturned = 0
+      let totalWagered = 0
+      let wins = 0
+      let losses = 0
+      let pushes = 0
+
+      for (let i = 0; i < playerHands.length; i++) {
+        const hand = playerHands[i]
+        const wager = wagers[i]
+        totalWagered += wager
+        const outcome: Outcome = isBust(hand) ? 'lose' : settle(hand, dealerHand)
+        const returned = payout(outcome, wager, fromSplit)
+        totalReturned += returned
+        if (returned > wager) wins++
+        else if (returned === 0) losses++
+        else pushes++
+      }
+
+      if (totalReturned > 0) addBalance(totalReturned, wins > 0)
+      setLastDelta(totalReturned - totalWagered)
+
+      if (playerHands.length > 1) {
+        if (wins === playerHands.length) setMessage('Both hands win!')
+        else if (losses === playerHands.length) setMessage('Both hands lose')
+        else setMessage(`Split: ${wins} won, ${losses} lost${pushes ? `, ${pushes} push` : ''}`)
+      } else {
+        const hand = playerHands[0]
+        const outcome: Outcome = isBust(hand) ? 'lose' : settle(hand, dealerHand)
+        setMessage(isBust(hand) ? 'Bust!' : OUTCOME_MESSAGES[outcome])
+      }
+
       setPhase('done')
     },
     [addBalance],
+  )
+
+  const advanceFinishedHand = useCallback(
+    (handIdx: number, playerHands: Card[][], wagers: number[]) => {
+      setHandFinished((finished) => {
+        const updated = finished.map((f, i) => (i === handIdx ? true : f))
+        const nextIdx = updated.findIndex((done) => !done)
+        if (nextIdx === -1) {
+          if (playerHands.every((h) => isBust(h))) finishRound(playerHands, dealer, wagers, splitPerformed)
+          else setPhase('dealer')
+        } else {
+          setActiveHand(nextIdx)
+        }
+        return updated
+      })
+    },
+    [dealer, finishRound, splitPerformed],
   )
 
   const deal = () => {
@@ -75,7 +125,11 @@ export function BlackjackGame() {
     addBalance(-bet)
     const p = [draw(), draw()]
     const d = [draw(), draw()]
-    setPlayer([])
+    setHands([[]])
+    setHandBets([bet])
+    setHandFinished([false])
+    setActiveHand(0)
+    setSplitPerformed(false)
     setDealer([])
     setMessage(null)
     setLastDelta(0)
@@ -83,78 +137,145 @@ export function BlackjackGame() {
 
     const steps = blackjackInitialSteps(p, d)
     timers.current.push(
-      ...scheduleCardReveals(steps, (step) => {
-        if (step.hand === 'player') setPlayer((h) => [...h, step.card])
-        else setDealer((h) => [...h, step.card])
-      }, () => {
-        if (isBlackjack(p) || isBlackjack(d)) finishHand(p, d, bet)
-        else setPhase('playing')
-      }),
+      ...scheduleCardReveals(
+        steps,
+        (step) => {
+          if (step.hand === 'player') setHands((h) => [[...h[0], step.card]])
+          else setDealer((h) => [...h, step.card])
+        },
+        () => {
+          setHands([p])
+          setDealer(d)
+          if (isBlackjack(p) || isBlackjack(d)) finishRound([p], d, [bet], false)
+          else setPhase('playing')
+        },
+      ),
     )
   }
 
   const hit = () => {
     if (phase !== 'playing' || drawing) return
+    const handIdx = activeHand
     setDrawing(true)
     const card = draw()
     timers.current.push(
       window.setTimeout(() => {
-        setPlayer((h) => {
-          const next = [...h, card]
-          if (isBust(next)) finishHand(next, dealer, bet)
+        playCardDealSound()
+        setDrawing(false)
+        setHands((prev) => {
+          const next = prev.map((h, i) => (i === handIdx ? [...h, card] : h))
+          if (isBust(next[handIdx])) {
+            setHandBets((wagers) => {
+              advanceFinishedHand(handIdx, next, wagers)
+              return wagers
+            })
+          }
           return next
         })
-        setDrawing(false)
       }, CARD_REVEAL_MS),
     )
   }
 
   const stand = () => {
     if (phase !== 'playing' || drawing) return
-    setPhase('dealer')
+    advanceFinishedHand(activeHand, hands, handBets)
   }
 
-  const canDouble = phase === 'playing' && player.length === 2 && balance >= bet && !drawing
+  const activeWager = handBets[activeHand] ?? 0
+  const canDouble =
+    phase === 'playing' && currentHand.length === 2 && balance >= activeWager && !drawing
 
   const doubleDown = () => {
     if (!canDouble) return
-    addBalance(-bet)
-    const doubled = bet * 2
-    setBet(doubled)
+    const handIdx = activeHand
+    addBalance(-activeWager)
     setDrawing(true)
     const card = draw()
     timers.current.push(
       window.setTimeout(() => {
-        let busted = false
-        setPlayer((h) => {
-          const next = [...h, card]
-          busted = isBust(next)
-          if (busted) finishHand(next, dealer, doubled)
-          return next
-        })
+        playCardDealSound()
         setDrawing(false)
-        if (!busted) setPhase('dealer')
+        setHandBets((wagers) => {
+          const newWagers = wagers.map((w, i) => (i === handIdx ? w * 2 : w))
+          setHands((prev) => {
+            const next = prev.map((h, i) => (i === handIdx ? [...h, card] : h))
+            advanceFinishedHand(handIdx, next, newWagers)
+            return next
+          })
+          return newWagers
+        })
       }, CARD_REVEAL_MS),
     )
   }
 
-  // dealer draws one card at a time for suspense
+  const canSplit =
+    phase === 'playing' &&
+    !splitPerformed &&
+    hands.length === 1 &&
+    canSplitHand(currentHand) &&
+    balance >= activeWager &&
+    !drawing
+
+  const split = () => {
+    if (!canSplit) return
+    const [c0, c1] = currentHand
+    addBalance(-activeWager)
+    const wager = activeWager
+    setSplitPerformed(true)
+    setHands([[c0], [c1]])
+    setHandBets([wager, wager])
+    setHandFinished([false, false])
+    setActiveHand(0)
+    setDrawing(true)
+
+    const card0 = draw()
+    const card1 = draw()
+    const splitAces = c0.rank === 'A'
+
+    timers.current.push(
+      window.setTimeout(() => {
+        playCardDealSound()
+        setHands([[c0, card0], [c1]])
+        timers.current.push(
+          window.setTimeout(() => {
+            playCardDealSound()
+            const finalHands = [[c0, card0], [c1, card1]]
+            setHands(finalHands)
+            setDrawing(false)
+            if (splitAces) {
+              setHandFinished([true, true])
+              setPhase('dealer')
+            } else {
+              setPhase('playing')
+              setActiveHand(0)
+            }
+          }, CARD_REVEAL_MS),
+        )
+      }, CARD_REVEAL_MS),
+    )
+  }
+
   useEffect(() => {
     if (phase !== 'dealer') return
     if (dealerShouldHit(dealer)) {
       const t = setTimeout(() => {
+        playCardDealSound()
         const card = draw()
         setDealer((d) => [...d, card])
       }, 650)
       return () => clearTimeout(t)
     }
-    const t = setTimeout(() => finishHand(player, dealer, bet), 500)
+    const t = setTimeout(() => finishRound(hands, dealer, handBets, splitPerformed), 500)
     return () => clearTimeout(t)
-  }, [phase, dealer, player, bet, draw, finishHand])
+  }, [phase, dealer, hands, handBets, splitPerformed, draw, finishRound])
 
   const newHand = () => {
     setPhase('betting')
-    setPlayer([])
+    setHands([[]])
+    setHandBets([0])
+    setHandFinished([false])
+    setActiveHand(0)
+    setSplitPerformed(false)
     setDealer([])
     setBet(0)
     setMessage(null)
@@ -172,7 +293,6 @@ export function BlackjackGame() {
   }, [canLeave, leave])
 
   const dealerRevealed = phase === 'dealer' || phase === 'done'
-  const playerVal = player.length ? handValue(player).total : null
   const dealerVal = dealer.length
     ? dealerRevealed
       ? handValue(dealer).total
@@ -211,23 +331,38 @@ export function BlackjackGame() {
             </div>
           )}
 
-          <div className="bj-hand">
-            <div className="bj-hand-label">
-              You {playerVal !== null && <span className="bj-total">{playerVal}</span>}
-            </div>
-            <div className="bj-cards">
-              {player.map((c, i) => (
-                <PlayingCard key={i} card={c} />
-              ))}
-              {player.length === 0 && <div className="card card-slot" />}
-            </div>
+          <div className={`bj-player-hands ${hands.length > 1 ? 'bj-split' : ''}`}>
+            {hands.map((hand, i) => {
+              const val = hand.length ? handValue(hand).total : null
+              const isActive = i === activeHand && phase === 'playing' && !handFinished[i]
+              return (
+                <div
+                  key={i}
+                  className={`bj-hand ${isActive ? 'bj-hand-active' : ''} ${handFinished[i] ? 'bj-hand-done' : ''}`}
+                >
+                  <div className="bj-hand-label">
+                    {hands.length > 1 ? `Hand ${i + 1}` : 'You'}
+                    {val !== null && <span className="bj-total">{val}</span>}
+                    {hands.length > 1 && handBets[i] > 0 && (
+                      <span className="bj-hand-bet">{handBets[i]}</span>
+                    )}
+                  </div>
+                  <div className="bj-cards">
+                    {hand.map((c, j) => (
+                      <PlayingCard key={j} card={c} />
+                    ))}
+                    {hand.length === 0 && <div className="card card-slot" />}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
         <div className="game-footer">
           <div className="balance-line">
             <span className="hud-chip" /> {balance.toLocaleString()}
-            {bet > 0 && <span className="bet-line">Bet: {bet}</span>}
+            {totalWager > 0 && <span className="bet-line">Bet: {totalWager}</span>}
           </div>
 
           {phase === 'betting' && (
@@ -264,6 +399,9 @@ export function BlackjackGame() {
               <button className="btn btn-primary" disabled={busy} onClick={stand}>Stand</button>
               <button className="btn btn-gold" disabled={!canDouble} onClick={doubleDown}>
                 Double
+              </button>
+              <button className="btn btn-gold" disabled={!canSplit} onClick={split}>
+                Split
               </button>
             </div>
           )}

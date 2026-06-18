@@ -58,7 +58,7 @@ export function HUD() {
       )}
 
       {inWorld && !activeGame && !isMobile && (
-        <div className="hud-hint">WASD move · Shift sprint · E interact</div>
+        <div className="hud-hint">WASD move · Shift sprint · Space jump · E interact</div>
       )}
 
       {inWorld && !activeGame && isMobile && (
@@ -74,6 +74,7 @@ export function HUD() {
           <p className="hud-start-click">Click anywhere to step onto the floor</p>
           <div className="hud-start-controls">
             <span><kbd>W A S D</kbd> walk</span>
+            <span><kbd>Space</kbd> jump</span>
             <span><kbd>Mouse</kbd> look</span>
             <span><kbd>E</kbd> play a game</span>
             <span><kbd>Esc</kbd> release cursor</span>

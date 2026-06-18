@@ -1379,6 +1379,170 @@ kbd {
   padding: 0 4px 4px;
 }
 
+/* ---------- ATM ---------- */
+
+.atm-panel {
+  width: min(560px, 94vw);
+}
+
+.atm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.atm-prompt {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: rgba(241, 233, 216, 0.92);
+}
+
+.atm-sub {
+  font-size: 0.9rem;
+  color: rgba(241, 233, 216, 0.55);
+}
+
+.atm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.atm-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: rgba(0, 0, 0, 0.45);
+  color: #f1e9d8;
+  font-size: 1.05rem;
+  font-family: inherit;
+}
+
+.atm-input:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px rgba(25, 227, 255, 0.25);
+}
+
+.atm-submit {
+  align-self: flex-start;
+  min-height: 48px;
+}
+
+.atm-examples {
+  font-size: 0.85rem;
+  color: rgba(241, 233, 216, 0.5);
+  line-height: 1.5;
+}
+
+.atm-screen {
+  background: #061018;
+  border: 3px solid #2d8f4e;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(45, 143, 78, 0.25);
+}
+
+.atm-screen-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--neon-cyan);
+  margin-bottom: 10px;
+}
+
+.atm-video {
+  width: 100%;
+  max-height: 280px;
+  border-radius: 8px;
+  background: #000;
+}
+
+.atm-youtube-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+}
+
+.atm-youtube {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.atm-playback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.atm-continue {
+  flex: 1;
+  min-width: 140px;
+}
+
+.atm-search-link {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.atm-clip-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  text-align: center;
+  color: rgba(241, 233, 216, 0.8);
+}
+
+.atm-larry {
+  font-size: 3rem;
+}
+
+.atm-clip-hint {
+  font-size: 0.82rem;
+  color: rgba(241, 233, 216, 0.55);
+}
+
+.atm-clip-hint code {
+  font-size: 0.78rem;
+  color: var(--gold-bright);
+}
+
+.atm-fail,
+.atm-success {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.atm-fail p {
+  color: #ff8787;
+  font-size: 1.05rem;
+}
+
+.atm-success-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #69f0a2;
+}
+
+.atm-balance {
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
 @media (max-width: 700px) {
   .hud-balance {
     top: max(10px, env(safe-area-inset-top));

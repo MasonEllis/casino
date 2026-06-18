@@ -1,0 +1,120 @@
+---
+pid: 5980
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; node scripts/gen-curb-youtube.mjs"
+started_at: 2026-06-18T03:31:56.152Z
+running_for_ms: 469995   
+---
+[7/120] AAMCO… 9-Rr5wetbNI
+[11/120] The Car Salesman… U__TRmoaKUo
+[12/120] Thor… onm_PJ2w2kw
+[13/120] Trick or Treat… v1WRmqTgxXo
+[14/120] The Shrimp Incident… UtedYWMKFTU
+[15/120] The Thong… xVwhYsl6_JM
+[16/120] The Acupuncturist… LXu5DuN_rrc
+[17/120] The Doll… tzKpI_AZToM
+[18/120] Shaq… eA582tX6UOE
+[19/120] The Baptism… PzKWWezqIQI
+[20/120] The Massage… cwYWjKqc550
+[21/120] Chet's Shirt… RrxEdtO3u74
+[22/120] The Benadryl Brownie… 8XPflEs5_BM
+[23/120] Club Soda and Salt… 8OIH5gxUV1M
+[24/120] The Nanny from Hell… xZjcmfdmxdI
+[25/120] The Terrorist Attack… RTr1AjrCfRc
+[26/120] The Special Section… OCkEsLYE3Ik
+[27/120] The Corpse-Sniffing Dog… g47Q63vkSbs
+[28/120] Krazee-Eyez Killa… JPZyX8wN8RU
+[29/120] Mary, Joseph and Larry… 9hMD91pUs9c
+[30/120] The Grand Opening… fXKUAHBBeRE
+[31/120] Mel's Offer… nuByqesMkJg
+[32/120] Ben's Birthday Party… bQlvPoUSK8k
+[33/120] The Blind Date… gnkmBCy4iFs
+[34/120] The Weatherman… E-FX1SaZVgY
+[35/120] The 5 Wood… axFmqBrTn-s
+[36/120] The Car Pool Lane… AGpp9Irjsy0
+[37/120] The Surrogate… dHY4zXZHfLo
+[38/120] Wandering Bear… jKfkSHiMK_U
+[39/120] The Survivor… 0KqDHFYcel8
+[40/120] Opening Night… n62ZjsVfwV4
+[41/120] The Larry David Sandwich… HFMVW71bDmQ
+[42/120] The Bowtie… c6_LiWy120c
+[43/120] The Christ Nail… RNCNdiEamBc
+[44/120] Kamikaze Bingo… yoBKSeK51fU
+[45/120] Lewis Needs a Kidney… BhtIy9mP1xo
+[46/120] The Smoking Jacket… VVX5yfsjhso
+[47/120] The Seder… f8AEFj8D9o0
+[48/120] The Ski Lift… thd5KDiiI9o
+[49/120] The Korean Bookie… WR6d67O6478
+[50/120] The End… BtR-lN5lY_4
+[51/120] Meet The Blacks… jxjRhvUghA4
+[52/120] The Anonymous Donor… JqrJ4wGid4Y
+[53/120] The Ida Funkhouser Roadside Memorial… 4a7ugc6K_ig
+[54/120] The Lefty Call… U4SmvlRmdsY
+[55/120] The Freak Book… j0MVeZStvOQ
+[56/120] The Rat Dog… Fa9PFoE6EKE
+[57/120] The TiVo Guy… 04eFcuUzv9U
+[58/120] The N Word… _bOFddeKwVg
+[59/120] The Therapist… cQKuQpItGGk
+[60/120] The Bat Mitzvah… Kz8nQqv46T4
+[61/120] Funkhouser's Crazy Sister… 07foedHhpjk
+[62/120] Vehicular Fellatio… o7652yugIco
+[63/120] The Reunion… P0Cbz4_Arx8
+[64/120] The Hot Towel… 5NeWeKF5FbI
+[65/120] Denise Handicapped… 877CXbk0MN4
+[66/120] The Bare Midriff… m-1saSNLveE
+[67/120] The Black Swan… vd2bSDKWblw
+[68/120] Officer Krupke… DkoXjnAm88s
+[69/120] The Table Read… xgU7ACn_6Mc
+[70/120] Seinfeld… 4Jw6mKmozjM
+[71/120] The Divorce… AccvGbf42C4
+[72/120] The Safe House… 3Jp1LyVhim0
+[73/120] Palestinian Chicken… 4WznZbYxwmY
+[74/120] The Smiley Face… auFlioaRZKc
+[75/120] Vow of Silence… NdaZl_a9leM
+[76/120] The Hero… OIVvUYTcETY
+[77/120] The Bi-Sexual… TJJEH-50ISY
+[78/120] Car Periscope… NIy7iicUs0o
+[79/120] Mister Softee… 6IiD2Gv8BG0
+[80/120] Larry vs. Michael J. Fox… fs0FYyzkgT4
+[81/120] Foisted!… YfqNd1ydO8E
+[82/120] The Pickle Gambit… 5pwG6RLCdoc
+[83/120] A Disturbance in the Kitchen… vjaHrp6JtyY
+[84/120] Running with the Bulls… ZmpBCe_jYng
+[85/120] Thank You for Your Service… LPquarz16wQ
+[86/120] The Accidental Text on Purpose… o2Wtvvc-Hls
+[87/120] Namaste… 1c-B5PS50d8
+[88/120] Never Wait for Seconds!… cwsBVK3zN1c
+[89/120] The Shucker… 6B7sbfHdxgY
+[90/120] Fatwa!… pMGZEnnLi3U
+[91/120] Happy New Year… 6yYUVbCQfJ4
+[92/120] Side Sitting… LkpA2pFZkP4
+[93/120] Artificial Fruit… 6zFsETsBLZM
+[94/120] You're Not Going to Get Me to Say Anything Bad About Mickey… vVPqMHRD9yI
+[95/120] Insufficient Praise… T0RtgP4TRzc
+[96/120] The Surprise Party… YXz9yHIf_q0
+[97/120] The Ugly Section… iuCpylibFf4
+[98/120] Elizabeth, Margaret and Larry… HEEcTSg3G3M
+[99/120] Beep Panic… luCzbrgY5MI
+[100/120] The Spite Store… P2k0VFX1FUw
+[101/120] The Five-Foot Fence… mstWOTSEVg4
+[102/120] Angel Muffin… OeHwBuC0PVQ
+[103/120] The Mini Bar… krSu2yeadaY
+[104/120] The Watermelon… QkXrACo-2Cc
+[105/120] IRASSHAIMASE!… LH80Ypz8xo0
+[106/120] Man Fights Tiny Woman… _85MSO488QM
+[107/120] Irma Kostroski… 6zfy4hPyMLc
+[108/120] What Have I Done?… lfJJd5F6VfA
+[109/120] Igor, Gregor, & Timor… 6gt_T98ApaI
+[110/120] The Mormon Advantage… yL9eIcnT9EM
+[111/120] Atlanta… ie8fFLKXfX8
+[112/120] The Lawn Jockey… sjRx32A5P9Y
+[113/120] Vertical Drop, Horizontal Tug… hGqKppJYx6U
+[114/120] Disgruntled… xE36sd1d5UY
+[115/120] Fish Stuck… oVqufRvCHyU
+[116/120] The Gettysburg Address… pPEQsYmYQrg
+[117/120] The Dream Scheme… ErFEV7fCO0U
+[118/120] The Colostomy Bag… niPi7MA4Kzo
+[119/120] Ken/Kendra… -qXmSXJ3FRo
+[120/120] No Lessons Learned… BtR-lN5lY_4
+
+done — 120 total, 111 added, 0 failed

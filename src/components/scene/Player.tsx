@@ -50,6 +50,7 @@ export function Player() {
       if (e.code === 'KeyE') {
         const { nearby, activeGame, openGame } = useCasino.getState()
         if (nearby && !activeGame) {
+          e.preventDefault()
           openGame(nearby)
           document.exitPointerLock()
         }

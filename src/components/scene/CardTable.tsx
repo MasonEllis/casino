@@ -1,6 +1,27 @@
+import { useMemo } from 'react'
+import * as THREE from 'three'
 import type { Interactable } from '../../game/store'
 
 const CHIP_COLORS = ['#c92a2a', '#1864ab', '#212529']
+
+function useTableLabelTexture(label: string) {
+  return useMemo(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 512
+    canvas.height = 128
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = 'rgba(8, 4, 13, 0.92)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.font = 'bold 52px Georgia, serif'
+    ctx.fillStyle = '#ffd27a'
+    ctx.fillText(label, 256, 68)
+    const tex = new THREE.CanvasTexture(canvas)
+    tex.colorSpace = THREE.SRGBColorSpace
+    return tex
+  }, [label])
+}
 
 /** Round card table used for baccarat and casino war, recolored per game. */
 export function CardTable({
@@ -13,6 +34,7 @@ export function CardTable({
   lampShadeColor: string
 }) {
   const [x, , z] = interactable.position
+  const labelTexture = useTableLabelTexture(interactable.label)
   return (
     <group position={[x, 0, z]} rotation={[0, interactable.rotationY, 0]}>
       {/* felt top */}
@@ -67,6 +89,19 @@ export function CardTable({
         <meshStandardMaterial color="#fff3c9" emissive="#ffdf8a" emissiveIntensity={3} toneMapped={false} />
       </mesh>
       <pointLight position={[0, 2.3, 0]} intensity={22} distance={8} color="#ffe9b0" />
+
+      {/* table name plaque */}
+      <mesh position={[0, 1.08, 0.95]} rotation={[-0.55, 0, 0]}>
+        <planeGeometry args={[1.1, 0.28]} />
+        <meshStandardMaterial
+          map={labelTexture}
+          emissive="#ffffff"
+          emissiveMap={labelTexture}
+          emissiveIntensity={0.9}
+          toneMapped={false}
+          transparent
+        />
+      </mesh>
     </group>
   )
 }

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { newShoe, type Card } from '../../game/blackjack'
+import { scheduleCardReveals } from '../../game/dealSequence'
 import { compareCards } from '../../game/war'
 import { useCasino } from '../../game/store'
 import { PlayingCard } from './PlayingCard'
 
-type Phase = 'betting' | 'war-choice' | 'done'
+type Phase = 'betting' | 'dealing' | 'war-choice' | 'done'
 
 const CHIP_VALUES = [10, 25, 50, 100]
 
@@ -15,6 +16,7 @@ export function WarGame() {
   const resetChips = useCasino((s) => s.resetChips)
 
   const shoe = useRef<Card[]>(newShoe(6))
+  const timers = useRef<number[]>([])
   const [phase, setPhase] = useState<Phase>('betting')
   const [bet, setBet] = useState(0)
   const [playerCards, setPlayerCards] = useState<Card[]>([])
@@ -23,6 +25,11 @@ export function WarGame() {
   const [lastDelta, setLastDelta] = useState(0)
 
   const canLeave = phase === 'betting' || phase === 'done'
+
+  useEffect(() => {
+    const pending = timers.current
+    return () => pending.forEach((t) => window.clearTimeout(t))
+  }, [])
 
   const leave = useCallback(() => {
     if (!canLeave) return
@@ -44,12 +51,7 @@ export function WarGame() {
     return shoe.current.pop()!
   }
 
-  const deal = () => {
-    if (bet <= 0 || phase !== 'betting') return
-    const p = draw()
-    const d = draw()
-    setPlayerCards([p])
-    setDealerCards([d])
+  const resolveInitial = (p: Card, d: Card) => {
     const cmp = compareCards(p, d)
     if (cmp === 1) {
       addBalance(bet * 2)
@@ -66,6 +68,31 @@ export function WarGame() {
     }
   }
 
+  const deal = () => {
+    if (bet <= 0 || phase !== 'betting') return
+    const p = draw()
+    const d = draw()
+    setPlayerCards([])
+    setDealerCards([])
+    setMessage(null)
+    setLastDelta(0)
+    setPhase('dealing')
+
+    timers.current.push(
+      ...scheduleCardReveals(
+        [
+          { hand: 'player', card: p },
+          { hand: 'dealer', card: d },
+        ],
+        (step) => {
+          if (step.hand === 'player') setPlayerCards((h) => [...h, step.card])
+          else setDealerCards((h) => [...h, step.card])
+        },
+        () => resolveInitial(p, d),
+      ),
+    )
+  }
+
   const surrender = () => {
     const refund = Math.floor(bet / 2)
     addBalance(refund)
@@ -76,21 +103,13 @@ export function WarGame() {
 
   const canWar = balance >= bet
 
-  const goToWar = () => {
-    if (!canWar) return
-    addBalance(-bet) // raise matching the original bet
-    const p = draw()
-    const d = draw()
-    setPlayerCards((cards) => [...cards, p])
-    setDealerCards((cards) => [...cards, d])
+  const resolveWar = (p: Card, d: Card) => {
     const cmp = compareCards(p, d)
     if (cmp === 1) {
-      // original pushes, raise pays 1:1
       addBalance(bet * 3)
       setLastDelta(bet)
       setMessage('War won!')
     } else if (cmp === 0) {
-      // tie in war pays a bonus
       addBalance(bet * 4)
       setLastDelta(bet * 2)
       setMessage('Double tie! Bonus payout!')
@@ -101,7 +120,32 @@ export function WarGame() {
     setPhase('done')
   }
 
+  const goToWar = () => {
+    if (!canWar || phase !== 'war-choice') return
+    addBalance(-bet)
+    const p = draw()
+    const d = draw()
+    setPhase('dealing')
+    setMessage(null)
+
+    timers.current.push(
+      ...scheduleCardReveals(
+        [
+          { hand: 'player', card: p },
+          { hand: 'dealer', card: d },
+        ],
+        (step) => {
+          if (step.hand === 'player') setPlayerCards((h) => [...h, step.card])
+          else setDealerCards((h) => [...h, step.card])
+        },
+        () => resolveWar(p, d),
+      ),
+    )
+  }
+
   const newRound = () => {
+    timers.current.forEach((t) => window.clearTimeout(t))
+    timers.current = []
     setPhase('betting')
     setBet(0)
     setPlayerCards([])
@@ -186,6 +230,8 @@ export function WarGame() {
               )}
             </div>
           )}
+
+          {phase === 'dealing' && <div className="controls dealer-thinking">Dealing…</div>}
 
           {phase === 'war-choice' && (
             <div className="controls">

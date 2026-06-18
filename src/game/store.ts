@@ -67,9 +67,12 @@ interface CasinoState {
   balance: number
   activeGame: Interactable | null
   nearby: Interactable | null
+  /** touch/mobile: player has entered the floor (replaces pointer lock) */
+  floorEntered: boolean
   setNearby: (i: Interactable | null) => void
   openGame: (i: Interactable) => void
   closeGame: () => void
+  enterFloor: () => void
   addBalance: (delta: number) => void
   resetChips: () => void
   /** re-engage pointer lock; registered by the Player controller */
@@ -80,9 +83,11 @@ export const useCasino = create<CasinoState>((set) => ({
   balance: loadBalance(),
   activeGame: null,
   nearby: null,
+  floorEntered: false,
   setNearby: (i) => set({ nearby: i }),
   openGame: (i) => set({ activeGame: i }),
   closeGame: () => set({ activeGame: null }),
+  enterFloor: () => set({ floorEntered: true }),
   addBalance: (delta) =>
     set((s) => {
       const balance = Math.max(0, s.balance + delta)

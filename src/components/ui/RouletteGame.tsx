@@ -142,6 +142,7 @@ export function RouletteGame() {
           </div>
         </div>
 
+        <div className="rl-board-scroll">
         <div className="rl-board">
           <button
             className={`rl-cell rl-green rl-zero ${result === 0 ? 'rl-hit' : ''}`}
@@ -162,6 +163,7 @@ export function RouletteGame() {
               gridRow: 5,
             }),
           )}
+        </div>
         </div>
 
         <div className="game-footer">

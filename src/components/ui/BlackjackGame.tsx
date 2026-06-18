@@ -10,10 +10,11 @@ import {
   type Card,
   type Outcome,
 } from '../../game/blackjack'
+import { blackjackInitialSteps, CARD_REVEAL_MS, scheduleCardReveals } from '../../game/dealSequence'
 import { useCasino } from '../../game/store'
 import { PlayingCard } from './PlayingCard'
 
-type Phase = 'betting' | 'playing' | 'dealer' | 'done'
+type Phase = 'betting' | 'dealing' | 'playing' | 'dealer' | 'done'
 
 const CHIP_VALUES = [10, 25, 50, 100]
 
@@ -44,6 +45,13 @@ export function BlackjackGame() {
   const [dealer, setDealer] = useState<Card[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [lastDelta, setLastDelta] = useState(0)
+  const [drawing, setDrawing] = useState(false)
+  const timers = useRef<number[]>([])
+
+  useEffect(() => {
+    const pending = timers.current
+    return () => pending.forEach((t) => window.clearTimeout(t))
+  }, [])
 
   const draw = useCallback((): Card => {
     if (shoe.current.length < 15) shoe.current = newShoe()
@@ -63,47 +71,71 @@ export function BlackjackGame() {
   )
 
   const deal = () => {
-    if (bet <= 0 || bet > balance) return
+    if (bet <= 0 || bet > balance || phase !== 'betting') return
     addBalance(-bet)
     const p = [draw(), draw()]
     const d = [draw(), draw()]
-    setPlayer(p)
-    setDealer(d)
+    setPlayer([])
+    setDealer([])
     setMessage(null)
     setLastDelta(0)
-    if (isBlackjack(p) || isBlackjack(d)) {
-      finishHand(p, d, bet)
-    } else {
-      setPhase('playing')
-    }
+    setPhase('dealing')
+
+    const steps = blackjackInitialSteps(p, d)
+    timers.current.push(
+      ...scheduleCardReveals(steps, (step) => {
+        if (step.hand === 'player') setPlayer((h) => [...h, step.card])
+        else setDealer((h) => [...h, step.card])
+      }, () => {
+        if (isBlackjack(p) || isBlackjack(d)) finishHand(p, d, bet)
+        else setPhase('playing')
+      }),
+    )
   }
 
   const hit = () => {
+    if (phase !== 'playing' || drawing) return
+    setDrawing(true)
     const card = draw()
-    const next = [...player, card]
-    setPlayer(next)
-    if (isBust(next)) {
-      finishHand(next, dealer, bet)
-    }
+    timers.current.push(
+      window.setTimeout(() => {
+        setPlayer((h) => {
+          const next = [...h, card]
+          if (isBust(next)) finishHand(next, dealer, bet)
+          return next
+        })
+        setDrawing(false)
+      }, CARD_REVEAL_MS),
+    )
   }
 
-  const stand = () => setPhase('dealer')
+  const stand = () => {
+    if (phase !== 'playing' || drawing) return
+    setPhase('dealer')
+  }
 
-  const canDouble = phase === 'playing' && player.length === 2 && balance >= bet
+  const canDouble = phase === 'playing' && player.length === 2 && balance >= bet && !drawing
 
   const doubleDown = () => {
     if (!canDouble) return
     addBalance(-bet)
     const doubled = bet * 2
     setBet(doubled)
+    setDrawing(true)
     const card = draw()
-    const next = [...player, card]
-    setPlayer(next)
-    if (isBust(next)) {
-      finishHand(next, dealer, doubled)
-    } else {
-      setPhase('dealer')
-    }
+    timers.current.push(
+      window.setTimeout(() => {
+        let busted = false
+        setPlayer((h) => {
+          const next = [...h, card]
+          busted = isBust(next)
+          if (busted) finishHand(next, dealer, doubled)
+          return next
+        })
+        setDrawing(false)
+        if (!busted) setPhase('dealer')
+      }, CARD_REVEAL_MS),
+    )
   }
 
   // dealer draws one card at a time for suspense
@@ -129,6 +161,7 @@ export function BlackjackGame() {
   }
 
   const canLeave = phase === 'betting' || phase === 'done'
+  const busy = phase === 'dealing' || phase === 'dealer' || drawing
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -223,10 +256,12 @@ export function BlackjackGame() {
             </div>
           )}
 
+          {phase === 'dealing' && <div className="controls dealer-thinking">Dealing…</div>}
+
           {phase === 'playing' && (
             <div className="controls">
-              <button className="btn btn-primary" onClick={hit}>Hit</button>
-              <button className="btn btn-primary" onClick={stand}>Stand</button>
+              <button className="btn btn-primary" disabled={busy} onClick={hit}>Hit</button>
+              <button className="btn btn-primary" disabled={busy} onClick={stand}>Stand</button>
               <button className="btn btn-gold" disabled={!canDouble} onClick={doubleDown}>
                 Double
               </button>

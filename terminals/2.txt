@@ -3,7 +3,7 @@ pid: 5784
 cwd: "C:\Users\mason\source\repos\personal\playground\casino"
 command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; node scripts/gen-curb-youtube.mjs"
 started_at: 2026-06-18T03:30:15.534Z
-running_for_ms: 570002   
+running_for_ms: 1135003  
 ---
 undefined:2
   'the-pants-tent': 'n62ZjsVfwV4',

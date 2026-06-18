@@ -1285,17 +1285,22 @@ kbd {
 
 .crash-mult {
   position: absolute;
-  top: 50%;
+  top: 14px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   font-size: 3.2rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: var(--neon-cyan);
   text-shadow: 0 0 24px rgba(25, 227, 255, 0.5);
   font-variant-numeric: tabular-nums;
-  z-index: 3;
+  z-index: 20;
   pointer-events: none;
+  padding: 6px 18px;
+  border-radius: 12px;
+  background: rgba(6, 14, 24, 0.82);
+  border: 1px solid rgba(25, 227, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 .crash-mult.live {
@@ -1306,7 +1311,7 @@ kbd {
   color: #ff4757;
   text-shadow: 0 0 30px rgba(255, 71, 87, 0.7);
   animation: multShake 0.4s ease-out;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .crash-mult.win {
@@ -1320,9 +1325,9 @@ kbd {
 }
 
 @keyframes multShake {
-  0%, 100% { transform: translate(calc(-50% - 0px), -50%); }
-  25% { transform: translate(calc(-50% - 6px), -50%); }
-  75% { transform: translate(calc(-50% + 6px), -50%); }
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translateX(calc(-50% - 6px)); }
+  75% { transform: translateX(calc(-50% + 6px)); }
 }
 
 .crash-message {
@@ -1695,7 +1700,9 @@ kbd {
   }
 
   .crash-mult {
-    font-size: 2.4rem;
+    top: 10px;
+    font-size: 2.2rem;
+    padding: 4px 14px;
   }
 
   .crash-cashout-btn {

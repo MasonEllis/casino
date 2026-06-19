@@ -1,0 +1,17 @@
+[Unit]
+Description=Grand Royale casino lobby WebSocket server
+After=network.target
+
+[Service]
+Type=simple
+User=mason
+Group=mason
+WorkingDirectory=/opt/casino-lobby
+Environment=NODE_ENV=production
+Environment=LOBBY_PORT=8787
+ExecStart=/usr/bin/node /opt/casino-lobby/node_modules/tsx/dist/cli.mjs /opt/casino-lobby/server/index.ts
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,13 +1,15 @@
-const MUSIC_VOL = 0.1
-const SFX_VOL = 0.38
-const CHORD_DURATION = 4
+import {
+  createTrackPlayer,
+  loadMusicTrack,
+  MUSIC_TRACKS,
+  saveMusicTrack,
+  type MusicTrackId,
+  type MusicTrackInfo,
+  type TrackPlayer,
+} from './musicTracks'
 
-const CHORDS = [
-  [220, 261.63, 329.63, 392],
-  [174.61, 220, 261.63, 329.63],
-  [261.63, 329.63, 392, 493.88],
-  [196, 246.94, 293.66, 349.23],
-] as const
+const MUSIC_VOL = 0.11
+const SFX_VOL = 0.38
 
 const WIN_NOTES = [523.25, 659.25, 783.99, 1046.5]
 
@@ -21,9 +23,10 @@ let rocketGain: GainNode | null = null
 let rocketFilter: BiquadFilterNode | null = null
 let rocketLfo: OscillatorNode | null = null
 let rocketSub: OscillatorNode | null = null
-let chordIndex = 0
 let musicStarted = false
 let muted = false
+let currentTrackId: MusicTrackId = loadMusicTrack()
+let trackPlayer: TrackPlayer | null = null
 
 function getCtx(): AudioContext {
   if (!ctx) ctx = new AudioContext()
@@ -75,46 +78,61 @@ export async function resumeAudio() {
   if (c.state === 'suspended') await c.resume()
 }
 
-function playChord() {
-  if (!musicGain || muted) return
-  const c = getCtx()
-  const chord = CHORDS[chordIndex % CHORDS.length]
-  chordIndex += 1
-  const now = c.currentTime
+function ensureTrackPlayer() {
+  if (!musicGain) return
+  trackPlayer = createTrackPlayer(currentTrackId, musicGain, getCtx)
+}
 
-  for (const freq of chord) {
-    const osc = c.createOscillator()
-    const gain = c.createGain()
-    const filter = c.createBiquadFilter()
-    osc.type = 'triangle'
-    osc.frequency.value = freq
-    filter.type = 'lowpass'
-    filter.frequency.value = 720
-    osc.connect(filter)
-    filter.connect(gain)
-    gain.connect(musicGain)
-    gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(0.09, now + 0.6)
-    gain.gain.setValueAtTime(0.09, now + CHORD_DURATION - 0.7)
-    gain.gain.linearRampToValueAtTime(0, now + CHORD_DURATION)
-    osc.start(now)
-    osc.stop(now + CHORD_DURATION + 0.05)
-  }
+function playMusicTick() {
+  if (!musicGain || muted || !trackPlayer) return
+  trackPlayer.play()
+}
+
+export function getMusicTrack(): MusicTrackId {
+  return currentTrackId
+}
+
+export function getMusicTrackList(): MusicTrackInfo[] {
+  return MUSIC_TRACKS
+}
+
+export function applyMusicTrack(id: MusicTrackId, options?: { persist?: boolean }) {
+  if (id === currentTrackId) return
+  const wasPlaying = musicStarted
+  stopBackgroundMusic()
+  currentTrackId = id
+  if (options?.persist) saveMusicTrack(id)
+  trackPlayer = null
+  if (wasPlaying && !muted) startBackgroundMusic()
+}
+
+/** Solo play — saved to this device only. */
+export function setMusicTrack(id: MusicTrackId) {
+  applyMusicTrack(id, { persist: true })
+}
+
+/** After leaving a lobby, restore this player's personal jukebox pick. */
+export function restorePersonalMusicTrack() {
+  applyMusicTrack(loadMusicTrack(), { persist: false })
 }
 
 export function startBackgroundMusic() {
   if (musicStarted) return
   musicStarted = true
   ensureGains()
+  ensureTrackPlayer()
   void resumeAudio()
-  playChord()
-  musicTimer = setInterval(playChord, CHORD_DURATION * 1000)
+  playMusicTick()
+  if (trackPlayer) {
+    musicTimer = setInterval(playMusicTick, trackPlayer.intervalMs)
+  }
 }
 
 export function stopBackgroundMusic() {
   if (musicTimer) clearInterval(musicTimer)
   musicTimer = null
   musicStarted = false
+  trackPlayer?.reset()
 }
 
 function playFilteredNoise(

@@ -6,8 +6,10 @@ import { RouletteTable } from './components/scene/RouletteTable'
 import { CrapsCorner } from './components/scene/CrapsCorner'
 import { CardTable } from './components/scene/CardTable'
 import { Player } from './components/scene/Player'
+import { RemotePlayers } from './components/scene/RemotePlayers'
 import { AudioManager } from './components/ui/AudioManager'
 import { HUD } from './components/ui/HUD'
+import { LobbyScreen } from './components/ui/LobbyScreen'
 import { MobileControls } from './components/ui/MobileControls'
 import { useIsMobile } from './hooks/useIsMobile'
 import { BlackjackGame } from './components/ui/BlackjackGame'
@@ -20,7 +22,9 @@ import { WarGame } from './components/ui/WarGame'
 import { CrashGame } from './components/ui/CrashGame'
 import { CrashTerminal } from './components/scene/CrashTerminal'
 import { AtmMachine } from './components/scene/AtmMachine'
+import { Jukebox } from './components/scene/Jukebox'
 import { AtmGame } from './components/ui/AtmGame'
+import { JukeboxGame } from './components/ui/JukeboxGame'
 import { INTERACTABLES, useCasino, type GameType, type Interactable } from './game/store'
 
 const PROPS: Record<GameType, (i: Interactable) => React.ReactNode> = {
@@ -28,10 +32,15 @@ const PROPS: Record<GameType, (i: Interactable) => React.ReactNode> = {
   slots: (i) => <SlotMachine key={i.id} interactable={i} />,
   roulette: (i) => <RouletteTable key={i.id} interactable={i} />,
   craps: (i) => <CrapsCorner key={i.id} interactable={i} />,
-  baccarat: (i) => <CardTable key={i.id} interactable={i} feltColor="#6b1020" lampShadeColor="#3b0d18" />,
-  war: (i) => <CardTable key={i.id} interactable={i} feltColor="#15356b" lampShadeColor="#0d1f3b" />,
+  baccarat: (i) => (
+    <CardTable key={i.id} interactable={i} feltColor="#6b1020" lampShadeColor="#3b0d18" feltDecal="B / P" />
+  ),
+  war: (i) => (
+    <CardTable key={i.id} interactable={i} feltColor="#15356b" lampShadeColor="#0d1f3b" feltDecal="WAR" />
+  ),
   crash: (i) => <CrashTerminal key={i.id} interactable={i} />,
   atm: (i) => <AtmMachine key={i.id} interactable={i} />,
+  jukebox: (i) => <Jukebox key={i.id} interactable={i} />,
 }
 
 export default function App() {
@@ -50,9 +59,11 @@ export default function App() {
           <CasinoFloor />
           {INTERACTABLES.map((i) => PROPS[i.type](i))}
           <Player />
+          <RemotePlayers />
         </Canvas>
       </div>
 
+      <LobbyScreen />
       <AudioManager />
       <HUD />
       <MobileControls />
@@ -65,6 +76,7 @@ export default function App() {
       {activeGame?.type === 'war' && <WarGame />}
       {activeGame?.type === 'crash' && <CrashGame />}
       {activeGame?.type === 'atm' && <AtmGame />}
+      {activeGame?.type === 'jukebox' && <JukeboxGame />}
     </div>
   )
 }

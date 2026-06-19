@@ -61,12 +61,6 @@ export function CrashTerminal({ interactable }: { interactable: Interactable }) 
         </mesh>
       ))}
 
-      {/* overhead sign */}
-      <mesh position={[0, 1.65, 0.3]}>
-        <boxGeometry args={[1.4, 0.25, 0.15]} />
-        <meshStandardMaterial color="#ff6b35" emissive="#ff6b35" emissiveIntensity={1} toneMapped={false} />
-      </mesh>
-
       {/* rocket on top of the console, in front so it isn't hidden by the cabinet */}
       <group position={[0, 1.55, 0.95]} renderOrder={10}>
         <mesh position={[0, 0.42, 0]} renderOrder={10}>

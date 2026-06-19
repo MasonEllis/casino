@@ -1,0 +1,7 @@
+---
+pid: 25060
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; npx --yes playwright@1.52.0 install chromium 2>&1 | Select-Object -Last 5"
+started_at: 2026-06-19T00:15:57.278Z
+running_for_ms: 125007   
+---

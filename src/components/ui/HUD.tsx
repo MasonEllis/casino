@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { isMuted, toggleMuted } from '../../game/audio'
-import { useCasino } from '../../game/store'
+import { useLobby } from '../../game/lobby'
+import { lobbyClient } from '../../game/lobbyClient'
+import { interactVerb, useCasino } from '../../game/store'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { LobbyBadge } from './LobbyBadge'
 
 export function HUD() {
   const balance = useCasino((s) => s.balance)
@@ -10,6 +13,7 @@ export function HUD() {
   const floorEntered = useCasino((s) => s.floorEntered)
   const enterFloor = useCasino((s) => s.enterFloor)
   const isMobile = useIsMobile()
+  const setPickerOpen = useLobby((s) => s.setPickerOpen)
   const [locked, setLocked] = useState(false)
   const [showStart, setShowStart] = useState(false)
   const [muted, setMuted] = useState(isMuted)
@@ -34,9 +38,12 @@ export function HUD() {
   return (
     <>
       <div className="hud-topbar">
-        <div className="hud-balance">
-          <span className="hud-chip" />
-          <span>{balance.toLocaleString()}</span>
+        <div className="hud-topbar-left">
+          <div className="hud-balance">
+            <span className="hud-chip" />
+            <span>{balance.toLocaleString()}</span>
+          </div>
+          <LobbyBadge />
         </div>
         <button
           type="button"
@@ -53,7 +60,7 @@ export function HUD() {
 
       {inWorld && !activeGame && nearby && !isMobile && (
         <div className="hud-prompt">
-          Press <kbd>E</kbd> to play {nearby.label}
+          Press <kbd>E</kbd> to {interactVerb(nearby.type)} {nearby.label}
         </div>
       )}
 
@@ -72,6 +79,16 @@ export function HUD() {
           </h1>
           <p className="hud-start-sub">CASINO</p>
           <p className="hud-start-click">Click anywhere to step onto the floor</p>
+          <button
+            type="button"
+            className="btn btn-ghost hud-multiplayer-btn"
+            onClick={() => {
+              setPickerOpen(true)
+              lobbyClient.connect()
+            }}
+          >
+            Play with Friends
+          </button>
           <div className="hud-start-controls">
             <span><kbd>W A S D</kbd> walk</span>
             <span><kbd>Space</kbd> jump</span>
@@ -90,6 +107,16 @@ export function HUD() {
           <p className="hud-start-sub">CASINO</p>
           <button type="button" className="btn btn-gold hud-enter-btn" onClick={enterFloor}>
             Enter Casino
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost hud-multiplayer-btn"
+            onClick={() => {
+              setPickerOpen(true)
+              lobbyClient.connect()
+            }}
+          >
+            Play with Friends
           </button>
           <div className="hud-start-controls">
             <span>Joystick walk</span>

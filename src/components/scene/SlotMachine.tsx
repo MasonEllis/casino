@@ -61,11 +61,6 @@ export function SlotMachine({ interactable }: { interactable: Interactable }) {
         <cylinderGeometry args={[0.06, 0.06, 0.04, 16]} />
         <meshStandardMaterial color="#e03131" emissive="#e03131" emissiveIntensity={0.8} />
       </mesh>
-      {/* top sign */}
-      <mesh position={[0, 1.95, 0.05]}>
-        <boxGeometry args={[0.85, 0.3, 0.5]} />
-        <meshStandardMaterial color={colors.sign} emissive={colors.sign} emissiveIntensity={1.2} toneMapped={false} />
-      </mesh>
       {/* blinking dome light */}
       <mesh position={[0, 2.2, 0.05]}>
         <sphereGeometry args={[0.1, 12, 12]} />

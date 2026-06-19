@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { mobileInput } from '../../game/input'
-import { useCasino } from '../../game/store'
+import { interactVerb, useCasino } from '../../game/store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
 const JOY_RADIUS = 54
@@ -157,7 +157,7 @@ export function MobileControls() {
           className="mobile-interact-btn"
           onClick={() => openGame(nearby)}
         >
-          Play {nearby.label}
+          {interactVerb(nearby.type) === 'use' ? 'Use' : 'Play'} {nearby.label}
         </button>
       )}
     </div>

@@ -29,7 +29,24 @@ You start with 1,000 chips (persisted to `localStorage`). If you go broke, claim
 
 ```bash
 npm install
-npm run dev
+npm run dev:all
+```
+
+`dev:all` runs the Vite client and the lobby WebSocket server together. For frontend-only work, `npm run dev` still works (lobbies require the server on port 8787).
+
+### Multiplayer lobbies
+
+Before entering the floor, pick a display name and join a lobby:
+
+- **Main Floor** — the public lobby (everyone plays together)
+- **Private lobbies** — create a room and share the 4-letter code, or join with a code
+
+Other players in your lobby appear as gold avatars on the casino floor with name tags. Movement syncs in real time (no chat yet).
+
+Production needs the lobby server running alongside the static site, with WebSocket proxy at `/casino/lobby`. Set `VITE_LOBBY_WS_URL` at build time if the socket lives on a different host.
+
+```bash
+npm run server
 ```
 
 Built with Vite, React, TypeScript, three.js, @react-three/fiber, @react-three/drei, and zustand.

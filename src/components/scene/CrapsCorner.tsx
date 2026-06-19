@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Interactable } from '../../game/store'
+import { GameSigns } from './GameTableSign'
 
 function Die({ position, rotationY }: { position: [number, number, number]; rotationY: number }) {
   return (
@@ -88,6 +89,8 @@ export function CrapsCorner({ interactable }: { interactable: Interactable }) {
       <Crate position={[-1.5, 0, -0.6]} rotationY={0.3} />
       <Crate position={[1.45, 0, -0.5]} rotationY={-0.4} />
       <Crate position={[1.6, 0, 0.35]} rotationY={0.15} size={0.45} />
+
+      <GameSigns feltDecal={{ text: 'CRAPS', accent: '#e8e0c8', position: [0, 0.018, 0], scale: 0.7 }} />
 
       {/* hanging bare bulb */}
       <mesh position={[0, 4.0, 0]}>

@@ -5,6 +5,8 @@ import * as THREE from 'three'
 import type { PointerLockControls as PointerLockControlsImpl } from 'three-stdlib'
 import { isCoarsePointer } from '../../game/device'
 import { mobileInput } from '../../game/input'
+import { lobbyClient } from '../../game/lobbyClient'
+import { useLobby } from '../../game/lobby'
 import { COLLIDERS, INTERACTABLES, ROOM, useCasino } from '../../game/store'
 
 const WALK_SPEED = 4.5
@@ -31,6 +33,7 @@ export function Player() {
   const verticalVelocity = useRef(0)
   const onGround = useRef(true)
   const jumpQueued = useRef(false)
+  const lastSync = useRef(0)
 
   useEffect(() => {
     camera.position.set(0, ROOM.eyeHeight, 10)
@@ -175,6 +178,19 @@ export function Player() {
     }
     if (state.nearby?.id !== closest?.id) {
       state.setNearby(closest)
+    }
+
+    const inWorld = isMobile.current ? state.floorEntered : document.pointerLockElement !== null
+    const lobby = useLobby.getState()
+    if (inWorld && lobby.status === 'connected' && performance.now() - lastSync.current > 50) {
+      lastSync.current = performance.now()
+      euler.setFromQuaternion(camera.quaternion, 'YXZ')
+      lobbyClient.sendMove(
+        camera.position.x,
+        camera.position.y,
+        camera.position.z,
+        euler.y,
+      )
     }
   })
 

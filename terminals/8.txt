@@ -1,0 +1,9 @@
+---
+pid: 29432
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd C:\\Users\\mason\\source\\repos\\personal\\playground\\casino; npx vite preview --port 4173"
+started_at: 2026-06-19T00:18:30.254Z
+running_for_ms: 95014    
+---
+  ➜  Local:   http://localhost:4173/casino/
+  ➜  Network: use --host to expose

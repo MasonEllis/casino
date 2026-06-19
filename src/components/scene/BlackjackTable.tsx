@@ -1,4 +1,5 @@
 import type { Interactable } from '../../game/store'
+import { GameSigns } from './GameTableSign'
 
 const CHIP_COLORS = ['#c92a2a', '#1864ab', '#212529']
 
@@ -26,17 +27,15 @@ export function BlackjackTable({ interactable }: { interactable: Interactable })
         <meshStandardMaterial color="#1d1208" roughness={0.7} />
       </mesh>
 
-      {/* dealt cards on the felt */}
-      <mesh position={[-0.25, 1.0, -0.35]} rotation={[-Math.PI / 2, 0, 0.25]}>
-        <planeGeometry args={[0.28, 0.4]} />
-        <meshStandardMaterial color="#f5f0e6" roughness={0.6} />
-      </mesh>
-      <mesh position={[0.1, 1.0, -0.3]} rotation={[-Math.PI / 2, 0, -0.18]}>
-        <planeGeometry args={[0.28, 0.4]} />
-        <meshStandardMaterial color="#f5f0e6" roughness={0.6} />
+      <GameSigns feltDecal={{ text: 'BLACKJACK', accent: '#d4c890', position: [0, 1.002, 0], scale: 0.72 }} />
+
+      {/* dealer shoe */}
+      <mesh position={[0, 1.02, -0.55]} rotation={[-Math.PI / 2, 0, 0]}>
+        <boxGeometry args={[0.22, 0.32, 0.08]} />
+        <meshStandardMaterial color="#1a1020" roughness={0.7} />
       </mesh>
 
-      {/* chip stacks */}
+      {/* chip tray */}
       {CHIP_COLORS.map((color, i) => (
         <mesh key={color} position={[-0.55 + i * 0.28, 1.03, 0.55]}>
           <cylinderGeometry args={[0.09, 0.09, 0.07, 16]} />

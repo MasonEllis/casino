@@ -2,7 +2,13 @@ import { create } from 'zustand'
 import { playWinSound } from './audio'
 import type { SlotVariantId } from './slots'
 
-export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash' | 'atm'
+export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash' | 'atm' | 'jukebox'
+
+const USE_VERB_TYPES = new Set<GameType>(['atm', 'jukebox'])
+
+export function interactVerb(type: GameType): 'play' | 'use' {
+  return USE_VERB_TYPES.has(type) ? 'use' : 'play'
+}
 
 export interface Interactable {
   id: string
@@ -42,6 +48,7 @@ export const INTERACTABLES: Interactable[] = [
   { id: 'war-1', type: 'war', label: 'Casino War', position: [6, 0, 3], rotationY: -0.7, interactRadius: 3.2, collideRadius: 2.0 },
   { id: 'crash-1', type: 'crash', label: 'Rocket Crash', position: [-3, 0, 12], rotationY: Math.PI, interactRadius: 3.0, collideRadius: 1.5 },
   { id: 'atm-1', type: 'atm', label: 'Curb ATM', position: [-17, 0, 8], rotationY: Math.PI / 2, interactRadius: 2.6, collideRadius: 0.8 },
+  { id: 'juke-1', type: 'jukebox', label: 'Jukebox', position: [-17, 0, -5], rotationY: Math.PI / 2, interactRadius: 2.8, collideRadius: 1.0 },
 ]
 
 export const COLUMN_POSITIONS: [number, number][] = [

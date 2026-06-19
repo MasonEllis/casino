@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { CasinoFloor } from './components/scene/CasinoFloor'
+import { SceneDecor } from './components/scene/SceneDecor'
 import { BlackjackTable } from './components/scene/BlackjackTable'
 import { SlotMachine } from './components/scene/SlotMachine'
 import { RouletteTable } from './components/scene/RouletteTable'
@@ -57,6 +58,7 @@ export default function App() {
           <color attach="background" args={['#08040d']} />
           <fog attach="fog" args={['#08040d', 20, 50]} />
           <CasinoFloor />
+          <SceneDecor />
           {INTERACTABLES.map((i) => PROPS[i.type](i))}
           <Player />
           <RemotePlayers />

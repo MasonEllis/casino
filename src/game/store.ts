@@ -59,9 +59,15 @@ export const COLUMN_POSITIONS: [number, number][] = [
 ]
 
 /** circle colliders the player gets pushed out of */
+export const DECOR_COLLIDERS: { x: number; z: number; r: number }[] = [
+  { x: 11, z: -12.2, r: 2.6 },
+  { x: -12, z: 12.2, r: 1.15 },
+]
+
 export const COLLIDERS: { x: number; z: number; r: number }[] = [
   ...INTERACTABLES.map((i) => ({ x: i.position[0], z: i.position[2], r: i.collideRadius })),
   ...COLUMN_POSITIONS.map(([x, z]) => ({ x, z, r: 0.8 })),
+  ...DECOR_COLLIDERS,
 ]
 
 const BALANCE_KEY = 'casino-balance'

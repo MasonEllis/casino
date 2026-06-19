@@ -6,6 +6,9 @@ import { SlotMachine } from './components/scene/SlotMachine'
 import { RouletteTable } from './components/scene/RouletteTable'
 import { CrapsCorner } from './components/scene/CrapsCorner'
 import { CardTable } from './components/scene/CardTable'
+import { LocalPlayerEmote } from './components/scene/LocalPlayerEmote'
+import { LocalPlayerReflection } from './components/scene/LocalPlayerReflection'
+import { MirrorCameraSetup } from './components/scene/MirrorCameraSetup'
 import { Player } from './components/scene/Player'
 import { RemotePlayers } from './components/scene/RemotePlayers'
 import { AudioManager } from './components/ui/AudioManager'
@@ -60,7 +63,10 @@ export default function App() {
           <CasinoFloor />
           <SceneDecor />
           {INTERACTABLES.map((i) => PROPS[i.type](i))}
+          <MirrorCameraSetup />
           <Player />
+          <LocalPlayerReflection />
+          <LocalPlayerEmote />
           <RemotePlayers />
         </Canvas>
       </div>

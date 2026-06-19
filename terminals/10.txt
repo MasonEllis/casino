@@ -1,0 +1,13 @@
+---
+pid: 27204
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd \"C:\\Users\\mason\\source\\repos\\personal\\playground\\casino\"; npx vite --port 5173"
+started_at: 2026-06-19T01:43:09.148Z
+running_for_ms: 3385004  
+---
+Port 5173 is in use, trying another one...
+
+  VITE v8.0.16  ready in 238 ms
+
+  ➜  Local:   http://localhost:5174/casino/
+  ➜  Network: use --host to expose

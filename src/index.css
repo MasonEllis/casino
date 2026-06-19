@@ -2292,3 +2292,79 @@ kbd {
   flex-shrink: 0;
   box-shadow: 0 0 6px currentColor;
 }
+
+/* ---------- emote bar ---------- */
+
+.emote-bar {
+  position: fixed;
+  bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 14;
+  pointer-events: auto;
+}
+
+.emote-bar--mobile {
+  bottom: auto;
+  left: auto;
+  transform: none;
+  top: 50%;
+  right: max(14px, env(safe-area-inset-right));
+  translate: 0 -50%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emote-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(12, 6, 20, 0.82);
+  color: #f1e9d8;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.emote-bar--mobile .emote-btn {
+  min-width: 56px;
+  min-height: 56px;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.emote-btn:active {
+  transform: scale(0.94);
+}
+
+.emote-btn.active {
+  border-color: var(--gold-bright);
+  background: rgba(212, 175, 55, 0.18);
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.35);
+}
+
+.emote-btn-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.emote-bar--mobile .emote-btn-icon {
+  font-size: 1.65rem;
+}
+
+.emote-btn-label {
+  white-space: nowrap;
+}

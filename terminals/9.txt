@@ -1,0 +1,12 @@
+---
+pid: 21672
+cwd: "C:\Users\mason\source\repos\personal\playground\casino"
+command: "cd \"C:\\Users\\mason\\source\\repos\\personal\\playground\\casino\"; npm run server"
+started_at: 2026-06-19T01:42:06.092Z
+running_for_ms: 3440010  
+---
+
+> casino@0.0.0 server
+> tsx server/index.ts
+
+Lobby server listening on :8787/casino/lobby

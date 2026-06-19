@@ -17,6 +17,8 @@ export interface RemotePlayer {
   y: number
   z: number
   yaw: number
+  emote?: string | null
+  emoteStartedAt?: number
 }
 
 export type ClientMessage =
@@ -24,6 +26,7 @@ export type ClientMessage =
   | { type: 'join'; name: string; mode: 'private-create' }
   | { type: 'join'; name: string; mode: 'private-join'; code: string }
   | { type: 'move'; x: number; y: number; z: number; yaw: number }
+  | { type: 'emote'; emote: string }
   | { type: 'set-music'; track: MusicTrackId }
   | { type: 'leave' }
 

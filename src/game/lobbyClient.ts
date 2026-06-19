@@ -5,6 +5,7 @@ import {
   type MusicTrackId,
   type ServerMessage,
 } from '../../shared/lobbyProtocol'
+import type { EmoteId } from './emotes'
 import { applyMusicTrack, restorePersonalMusicTrack, startBackgroundMusic } from './audio'
 import { resolveJoinName, useLobby } from './lobby'
 
@@ -118,6 +119,10 @@ class LobbyClient {
 
   sendMove(x: number, y: number, z: number, yaw: number) {
     this.send({ type: 'move', x, y, z, yaw })
+  }
+
+  sendEmote(emote: EmoteId) {
+    this.send({ type: 'emote', emote })
   }
 
   setMusic(track: MusicTrackId) {

@@ -4,6 +4,7 @@ import { useLobby } from '../../game/lobby'
 import { lobbyClient } from '../../game/lobbyClient'
 import { interactVerb, useCasino } from '../../game/store'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { EmoteBar } from './EmoteBar'
 import { LobbyBadge } from './LobbyBadge'
 
 export function HUD() {
@@ -65,8 +66,10 @@ export function HUD() {
       )}
 
       {inWorld && !activeGame && !isMobile && (
-        <div className="hud-hint">WASD move · Shift sprint · Space jump · E interact</div>
+        <div className="hud-hint">WASD move · Shift sprint · Space jump · E interact · <kbd>1</kbd> wave · <kbd>2</kbd> thumbs up</div>
       )}
+
+      {inWorld && !activeGame && <EmoteBar />}
 
       {inWorld && !activeGame && isMobile && (
         <div className="hud-hint hud-hint--mobile">Drag right to look · Joystick to walk</div>

@@ -24,6 +24,8 @@ interface Player {
   y: number
   z: number
   yaw: number
+  emote: string | null
+  emoteStartedAt: number
 }
 
 interface Room {
@@ -53,8 +55,19 @@ function send(ws: WebSocket, message: ServerMessage) {
   if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(message))
 }
 
+const VALID_EMOTES = new Set(['wave', 'thumbsup', 'salute'])
+
 function playerSnapshot(p: Player): RemotePlayer {
-  return { id: p.id, name: p.name, x: p.x, y: p.y, z: p.z, yaw: p.yaw }
+  return {
+    id: p.id,
+    name: p.name,
+    x: p.x,
+    y: p.y,
+    z: p.z,
+    yaw: p.yaw,
+    emote: p.emote,
+    emoteStartedAt: p.emoteStartedAt,
+  }
 }
 
 function broadcastRoom(room: Room, message: ServerMessage, exceptId?: string) {
@@ -112,6 +125,8 @@ function joinRoom(ws: WebSocket, room: Room, name: string): Player | null {
     y: 1.65,
     z: 10,
     yaw: 0,
+    emote: null,
+    emoteStartedAt: 0,
   }
 
   room.players.set(player.id, player)
@@ -202,6 +217,29 @@ function handleMessage(ws: WebSocket, raw: string) {
     for (const p of room.players.values()) {
       send(p.ws, { type: 'music-update', musicTrack: room.musicTrack })
     }
+    return
+  }
+
+  if (msg.type === 'emote') {
+    const playerId = (ws as WebSocket & { playerId?: string }).playerId
+    const roomId = (ws as WebSocket & { roomId?: string }).roomId
+    if (!playerId || !roomId) return
+    const room = rooms.get(roomId)
+    const player = room?.players.get(playerId)
+    if (!player) return
+    if (!VALID_EMOTES.has(msg.emote)) return
+
+    player.emote = msg.emote
+    player.emoteStartedAt = Date.now()
+
+    broadcastRoom(
+      room!,
+      {
+        type: 'room-update',
+        players: roomPlayers(room!),
+      },
+      playerId,
+    )
     return
   }
 

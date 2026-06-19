@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 import { playWinSound } from './audio'
+import type { EmoteId } from './emotes'
+import { useLobby } from './lobby'
+import { lobbyClient } from './lobbyClient'
 import type { SlotVariantId } from './slots'
 
 export type GameType = 'blackjack' | 'slots' | 'roulette' | 'craps' | 'baccarat' | 'war' | 'crash' | 'atm' | 'jukebox'
@@ -62,6 +65,7 @@ export const COLUMN_POSITIONS: [number, number][] = [
 export const DECOR_COLLIDERS: { x: number; z: number; r: number }[] = [
   { x: 11, z: -12.2, r: 2.6 },
   { x: -12, z: 12.2, r: 1.15 },
+  { x: -17.4, z: 12.6, r: 0.55 },
 ]
 
 export const COLLIDERS: { x: number; z: number; r: number }[] = [
@@ -85,17 +89,24 @@ export interface RouletteSpinState {
   durationMs: number
 }
 
+export interface ActiveEmote {
+  type: EmoteId
+  startedAt: number
+}
+
 interface CasinoState {
   balance: number
   activeGame: Interactable | null
   nearby: Interactable | null
   /** touch/mobile: player has entered the floor (replaces pointer lock) */
   floorEntered: boolean
+  activeEmote: ActiveEmote | null
   rouletteSpin: RouletteSpinState | null
   setNearby: (i: Interactable | null) => void
   openGame: (i: Interactable) => void
   closeGame: () => void
   enterFloor: () => void
+  triggerEmote: (type: EmoteId) => void
   startRouletteSpin: (tableId: string, result: number, durationMs: number, startedAt?: number) => void
   clearRouletteSpin: () => void
   addBalance: (delta: number, playWin?: boolean) => void
@@ -109,6 +120,7 @@ export const useCasino = create<CasinoState>((set) => ({
   activeGame: null,
   nearby: null,
   floorEntered: false,
+  activeEmote: null,
   rouletteSpin: null,
   setNearby: (i) => set({ nearby: i }),
   openGame: (i) => set({ activeGame: i }),
@@ -117,6 +129,13 @@ export const useCasino = create<CasinoState>((set) => ({
     set({ rouletteSpin: { tableId, result, startedAt, durationMs } }),
   clearRouletteSpin: () => set({ rouletteSpin: null }),
   enterFloor: () => set({ floorEntered: true }),
+  triggerEmote: (type) => {
+    const startedAt = Date.now()
+    set({ activeEmote: { type, startedAt } })
+    if (useLobby.getState().status === 'connected') {
+      lobbyClient.sendEmote(type)
+    }
+  },
   addBalance: (delta, playWin = false) => {
     if (playWin && delta > 0) playWinSound()
     set((s) => {

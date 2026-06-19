@@ -72,16 +72,26 @@ function loadBalance(): number {
   return Number.isFinite(n) && n >= 0 ? n : 1000
 }
 
+export interface RouletteSpinState {
+  tableId: string
+  result: number
+  startedAt: number
+  durationMs: number
+}
+
 interface CasinoState {
   balance: number
   activeGame: Interactable | null
   nearby: Interactable | null
   /** touch/mobile: player has entered the floor (replaces pointer lock) */
   floorEntered: boolean
+  rouletteSpin: RouletteSpinState | null
   setNearby: (i: Interactable | null) => void
   openGame: (i: Interactable) => void
   closeGame: () => void
   enterFloor: () => void
+  startRouletteSpin: (tableId: string, result: number, durationMs: number, startedAt?: number) => void
+  clearRouletteSpin: () => void
   addBalance: (delta: number, playWin?: boolean) => void
   resetChips: () => void
   /** re-engage pointer lock; registered by the Player controller */
@@ -93,9 +103,13 @@ export const useCasino = create<CasinoState>((set) => ({
   activeGame: null,
   nearby: null,
   floorEntered: false,
+  rouletteSpin: null,
   setNearby: (i) => set({ nearby: i }),
   openGame: (i) => set({ activeGame: i }),
-  closeGame: () => set({ activeGame: null }),
+  closeGame: () => set({ activeGame: null, rouletteSpin: null }),
+  startRouletteSpin: (tableId, result, durationMs, startedAt = performance.now()) =>
+    set({ rouletteSpin: { tableId, result, startedAt, durationMs } }),
+  clearRouletteSpin: () => set({ rouletteSpin: null }),
   enterFloor: () => set({ floorEntered: true }),
   addBalance: (delta, playWin = false) => {
     if (playWin && delta > 0) playWinSound()

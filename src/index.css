@@ -1020,15 +1020,80 @@ kbd {
   border: 4px solid var(--gold);
   box-shadow: 0 0 22px rgba(212, 175, 55, 0.35);
   flex-shrink: 0;
+  color: #f5f0e6;
 }
 
 .rl-wheel-display.rl-spinning {
   animation: wheelGlow 0.4s linear infinite alternate;
 }
 
+.rl-wheel-visual {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.rl-wheel-visual--spinning .rl-wheel-rim {
+  animation: wheelGlow 0.4s linear infinite alternate;
+}
+
+.rl-wheel-rim {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 22px rgba(212, 175, 55, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.35);
+  background: #1a1020;
+}
+
+.rl-wheel-rotor {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.rl-wheel-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.rl-wheel-ball {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  background: #f5f0e6;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.rl-wheel-pointer {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 18px solid var(--gold);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  z-index: 3;
+}
+
 @keyframes wheelGlow {
-  from { box-shadow: 0 0 14px rgba(212, 175, 55, 0.3); }
-  to { box-shadow: 0 0 34px rgba(255, 45, 149, 0.6); }
+  from { box-shadow: 0 0 14px rgba(212, 175, 55, 0.3), inset 0 0 18px rgba(0, 0, 0, 0.45); }
+  to { box-shadow: 0 0 34px rgba(255, 45, 149, 0.6), inset 0 0 18px rgba(0, 0, 0, 0.45); }
 }
 
 .rl-status {
@@ -1838,6 +1903,11 @@ kbd {
     width: 68px;
     height: 68px;
     font-size: 1.6rem;
+  }
+
+  .rl-wheel-visual {
+    width: 100px;
+    height: 100px;
   }
 
   .craps-panel,

@@ -4,6 +4,33 @@ const RED_NUMS = new Set([
   1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
 ])
 
+/** American wheel pocket order — matches the 3D wheel texture. */
+export const WHEEL_POCKET_ORDER: (number | '00')[] = [
+  0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1,
+  '00', 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2,
+]
+
+export function pocketIndexForNumber(n: number): number {
+  return WHEEL_POCKET_ORDER.findIndex((v) => v === n)
+}
+
+/** Rotation (rad) that aligns a pocket center with the fixed ball at the top of the track. */
+export function wheelRotationForResult(result: number): number {
+  const idx = pocketIndexForNumber(result)
+  if (idx < 0) return 0
+  return -((idx + 0.5) / WHEEL_POCKET_ORDER.length) * Math.PI * 2
+}
+
+export function spinTargetRotation(start: number, result: number, fullTurns = 5): number {
+  const final = wheelRotationForResult(result)
+  const tau = Math.PI * 2
+  const startMod = ((start % tau) + tau) % tau
+  const finalMod = ((final % tau) + tau) % tau
+  let delta = finalMod - startMod
+  if (delta <= 0) delta += tau
+  return start + fullTurns * tau + delta
+}
+
 /** American roulette felt — number grid + outside bets. */
 export function createRouletteLayoutTexture(): THREE.CanvasTexture {
   const w = 720
@@ -111,25 +138,22 @@ export function createRouletteLayoutTexture(): THREE.CanvasTexture {
   return tex
 }
 
-export function createRouletteWheelTexture(): THREE.CanvasTexture {
-  const size = 512
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const ctx = canvas.getContext('2d')!
+function drawRouletteWheelFace(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  opts: { fontSize: number; labelRadius: number; hubRadius: number; padding: number },
+) {
   const cx = size / 2
   const cy = size / 2
-  const r = size / 2 - 8
-  const pockets = 38
-  const order = [
-    0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1,
-    '00', 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2,
-  ]
+  const r = size / 2 - opts.padding
+  const pockets = WHEEL_POCKET_ORDER.length
+
+  ctx.clearRect(0, 0, size, size)
 
   for (let i = 0; i < pockets; i++) {
     const a0 = (i / pockets) * Math.PI * 2 - Math.PI / 2
     const a1 = ((i + 1) / pockets) * Math.PI * 2 - Math.PI / 2
-    const val = order[i % order.length]
+    const val = WHEEL_POCKET_ORDER[i]
     const isGreen = val === 0 || val === '00'
     ctx.beginPath()
     ctx.moveTo(cx, cy)
@@ -138,27 +162,67 @@ export function createRouletteWheelTexture(): THREE.CanvasTexture {
     ctx.fillStyle = isGreen ? '#1b7a43' : RED_NUMS.has(val as number) ? '#b91c1c' : '#141414'
     ctx.fill()
     ctx.strokeStyle = '#c9a13f'
-    ctx.lineWidth = 2
+    ctx.lineWidth = Math.max(1, size / 256)
     ctx.stroke()
 
     const mid = (a0 + a1) / 2
-    const tx = cx + Math.cos(mid) * (r * 0.72)
-    const ty = cy + Math.sin(mid) * (r * 0.72)
+    const tx = cx + Math.cos(mid) * (r * opts.labelRadius)
+    const ty = cy + Math.sin(mid) * (r * opts.labelRadius)
     ctx.save()
     ctx.translate(tx, ty)
     ctx.rotate(mid + Math.PI / 2)
-    ctx.fillStyle = '#f5f0e6'
-    ctx.font = 'bold 14px Georgia, serif'
+    const label = String(val)
+    ctx.font = `bold ${opts.fontSize}px Georgia, serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(String(val), 0, 0)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)'
+    ctx.lineWidth = Math.max(2, opts.fontSize * 0.14)
+    ctx.lineJoin = 'round'
+    ctx.strokeText(label, 0, 0)
+    ctx.fillStyle = '#f5f0e6'
+    ctx.fillText(label, 0, 0)
     ctx.restore()
   }
 
   ctx.beginPath()
-  ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2)
+  ctx.arc(cx, cy, r * opts.hubRadius, 0, Math.PI * 2)
   ctx.fillStyle = '#c9a13f'
   ctx.fill()
+}
+
+export function createRouletteWheelCanvas(): HTMLCanvasElement {
+  const tex = createRouletteWheelTexture()
+  return tex.image as HTMLCanvasElement
+}
+
+/** Decorative spin wheel for the betting UI — bold labels, compact hub. */
+export function createRouletteWheelCanvasForUI(): HTMLCanvasElement {
+  const size = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')!
+  drawRouletteWheelFace(ctx, size, {
+    fontSize: 17,
+    labelRadius: 0.78,
+    hubRadius: 0.14,
+    padding: 4,
+  })
+  return canvas
+}
+
+export function createRouletteWheelTexture(): THREE.CanvasTexture {
+  const size = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')!
+  drawRouletteWheelFace(ctx, size, {
+    fontSize: 14,
+    labelRadius: 0.72,
+    hubRadius: 0.22,
+    padding: 8,
+  })
 
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace

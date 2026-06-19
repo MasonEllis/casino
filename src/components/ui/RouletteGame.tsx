@@ -7,6 +7,7 @@ import {
   type OutsideBet,
 } from '../../game/roulette'
 import { useCasino } from '../../game/store'
+import { RouletteWheelVisual, type RouletteSpinSession } from './RouletteWheelVisual'
 
 const CHIP_VALUES = [5, 10, 25, 100]
 const SPIN_DURATION_MS = 2200
@@ -19,10 +20,13 @@ export function RouletteGame() {
   const addBalance = useCasino((s) => s.addBalance)
   const closeGame = useCasino((s) => s.closeGame)
   const resetChips = useCasino((s) => s.resetChips)
+  const activeGame = useCasino((s) => s.activeGame)
+  const startRouletteSpin = useCasino((s) => s.startRouletteSpin)
 
   const [chip, setChip] = useState(10)
   const [bets, setBets] = useState<Record<string, number>>({})
   const [spinning, setSpinning] = useState(false)
+  const [spinSession, setSpinSession] = useState<RouletteSpinSession | null>(null)
   const [display, setDisplay] = useState<number | null>(null)
   const [result, setResult] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -73,6 +77,10 @@ export function RouletteGame() {
     setLastWin(0)
 
     const final = spinWheel()
+    const startedAt = performance.now()
+    setSpinSession({ result: final, startedAt })
+    if (activeGame) startRouletteSpin(activeGame.id, final, SPIN_DURATION_MS, startedAt)
+
     const flicker = window.setInterval(() => {
       setDisplay(Math.floor(Math.random() * 37))
     }, 75)
@@ -133,7 +141,10 @@ export function RouletteGame() {
         </div>
 
         <div className="rl-wheel-row">
-          <div className={`rl-wheel-display rl-${display !== null ? numberColor(display) : 'green'} ${spinning ? 'rl-spinning' : ''}`}>
+          <RouletteWheelVisual session={spinSession} durationMs={SPIN_DURATION_MS} spinning={spinning} />
+          <div
+            className={`rl-wheel-display rl-${display !== null ? numberColor(display) : 'green'} ${spinning ? 'rl-spinning' : ''}`}
+          >
             {display ?? '—'}
           </div>
           <div className="rl-status">

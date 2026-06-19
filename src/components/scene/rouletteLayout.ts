@@ -4,21 +4,35 @@ const RED_NUMS = new Set([
   1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
 ])
 
-/** American wheel pocket order — matches the 3D wheel texture. */
-export const WHEEL_POCKET_ORDER: (number | '00')[] = [
-  0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1,
-  '00', 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2,
+export function pocketFillColor(val: number): string {
+  if (val === 0) return '#1b7a43'
+  return RED_NUMS.has(val) ? '#b91c1c' : '#17171c'
+}
+
+/** European single-zero wheel order (clockwise) — matches spinWheel() outcomes 0–36. */
+export const WHEEL_POCKET_ORDER: number[] = [
+  0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1,
+  20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
 ]
 
 export function pocketIndexForNumber(n: number): number {
   return WHEEL_POCKET_ORDER.findIndex((v) => v === n)
 }
 
-/** Rotation (rad) that aligns a pocket center with the fixed ball at the top of the track. */
+/** Three.js Y-rotation (rad) — aligns pocket center with ball at top (-Z). */
 export function wheelRotationForResult(result: number): number {
   const idx = pocketIndexForNumber(result)
   if (idx < 0) return 0
-  return -((idx + 0.5) / WHEEL_POCKET_ORDER.length) * Math.PI * 2
+  const n = WHEEL_POCKET_ORDER.length
+  return -((idx + 0.5) / n) * Math.PI * 2
+}
+
+/** SVG rotate() degrees — Y-down coords need opposite sign from Three.js. */
+export function wheelSvgRotationDeg(result: number): number {
+  const idx = pocketIndexForNumber(result)
+  if (idx < 0) return 0
+  const n = WHEEL_POCKET_ORDER.length
+  return -((idx + 0.5) / n) * 360
 }
 
 export function spinTargetRotation(start: number, result: number, fullTurns = 5): number {
@@ -29,6 +43,15 @@ export function spinTargetRotation(start: number, result: number, fullTurns = 5)
   let delta = finalMod - startMod
   if (delta <= 0) delta += tau
   return start + fullTurns * tau + delta
+}
+
+export function spinTargetSvgRotationDeg(startDeg: number, result: number, fullTurns = 5): number {
+  const final = wheelSvgRotationDeg(result)
+  const startMod = ((startDeg % 360) + 360) % 360
+  const finalMod = ((final % 360) + 360) % 360
+  let delta = finalMod - startMod
+  if (delta > 0) delta -= 360
+  return startDeg - fullTurns * 360 + delta
 }
 
 /** American roulette felt — number grid + outside bets. */
@@ -140,10 +163,33 @@ export function createRouletteLayoutTexture(): THREE.CanvasTexture {
   return tex
 }
 
+function fitFontSize(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  fontForSize: (size: number) => string,
+  maxSize: number,
+  minSize: number,
+): number {
+  let size = maxSize
+  while (size >= minSize) {
+    ctx.font = fontForSize(size)
+    if (ctx.measureText(text).width <= maxWidth) return size
+    size -= 1
+  }
+  return minSize
+}
+
 function drawRouletteWheelFace(
   ctx: CanvasRenderingContext2D,
   size: number,
-  opts: { fontSize: number; labelRadius: number; hubRadius: number; padding: number },
+  opts: {
+    fontSize: number
+    labelRadius: number
+    hubRadius: number
+    padding: number
+    adaptiveFont?: boolean
+  },
 ) {
   const cx = size / 2
   const cy = size / 2
@@ -156,12 +202,11 @@ function drawRouletteWheelFace(
     const a0 = (i / pockets) * Math.PI * 2 - Math.PI / 2
     const a1 = ((i + 1) / pockets) * Math.PI * 2 - Math.PI / 2
     const val = WHEEL_POCKET_ORDER[i]
-    const isGreen = val === 0 || val === '00'
     ctx.beginPath()
     ctx.moveTo(cx, cy)
     ctx.arc(cx, cy, r, a0, a1)
     ctx.closePath()
-    ctx.fillStyle = isGreen ? '#1b7a43' : RED_NUMS.has(val as number) ? '#b91c1c' : '#141414'
+    ctx.fillStyle = pocketFillColor(val)
     ctx.fill()
     ctx.strokeStyle = '#c9a13f'
     ctx.lineWidth = Math.max(1, size / 256)
@@ -174,11 +219,22 @@ function drawRouletteWheelFace(
     ctx.translate(tx, ty)
     ctx.rotate(mid + Math.PI / 2)
     const label = String(val)
-    ctx.font = `bold ${opts.fontSize}px Georgia, serif`
+    const arcWidth = 2 * (r * opts.labelRadius) * Math.sin(Math.PI / pockets) * 0.9
+    const fontSize = opts.adaptiveFont
+      ? fitFontSize(
+          ctx,
+          label,
+          arcWidth,
+          (s) => `bold ${s}px Georgia, serif`,
+          opts.fontSize,
+          Math.max(10, Math.floor(opts.fontSize * 0.45)),
+        )
+      : opts.fontSize
+    ctx.font = `bold ${fontSize}px Georgia, serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)'
-    ctx.lineWidth = Math.max(2, opts.fontSize * 0.14)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)'
+    ctx.lineWidth = Math.max(2, fontSize * 0.16)
     ctx.lineJoin = 'round'
     ctx.strokeText(label, 0, 0)
     ctx.fillStyle = '#f5f0e6'
@@ -197,18 +253,19 @@ export function createRouletteWheelCanvas(): HTMLCanvasElement {
   return tex.image as HTMLCanvasElement
 }
 
-/** Decorative spin wheel for the betting UI — bold labels, compact hub. */
+/** High-res wheel for the betting UI — large adaptive labels for readability while spinning. */
 export function createRouletteWheelCanvasForUI(): HTMLCanvasElement {
-  const size = 512
+  const size = 1024
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')!
   drawRouletteWheelFace(ctx, size, {
-    fontSize: 17,
-    labelRadius: 0.78,
-    hubRadius: 0.14,
-    padding: 4,
+    fontSize: 44,
+    labelRadius: 0.84,
+    hubRadius: 0.1,
+    padding: 2,
+    adaptiveFont: true,
   })
   return canvas
 }

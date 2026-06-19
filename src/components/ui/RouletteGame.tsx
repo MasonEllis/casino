@@ -140,16 +140,18 @@ export function RouletteGame() {
           </button>
         </div>
 
-        <div className="rl-wheel-row">
+        <div className="rl-wheel-area">
           <RouletteWheelVisual session={spinSession} durationMs={SPIN_DURATION_MS} spinning={spinning} />
-          <div
-            className={`rl-wheel-display rl-${display !== null ? numberColor(display) : 'green'} ${spinning ? 'rl-spinning' : ''}`}
-          >
-            {display ?? '—'}
-          </div>
-          <div className="rl-status">
-            {message ?? (spinning ? 'No more bets…' : 'Place your bets, then spin')}
-            {lastWin > 0 && <span className="bj-delta">+{lastWin}</span>}
+          <div className="rl-wheel-meta">
+            <div
+              className={`rl-wheel-display rl-${display !== null ? numberColor(display) : 'green'} ${spinning ? 'rl-spinning' : ''}`}
+            >
+              {display ?? '—'}
+            </div>
+            <div className="rl-status">
+              {message ?? (spinning ? 'No more bets…' : 'Place your bets, then spin')}
+              {lastWin > 0 && <span className="bj-delta">+{lastWin}</span>}
+            </div>
           </div>
         </div>
 

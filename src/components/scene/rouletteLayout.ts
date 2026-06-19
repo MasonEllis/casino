@@ -47,10 +47,13 @@ export function createRouletteLayoutTexture(): THREE.CanvasTexture {
   const gridX = margin
   const gridY = margin + 8
   const gridW = w - margin * 2
-  const zeroH = 40
-  const gridH = h - margin * 2 - zeroH - 54
-  const colW = gridW / 3
-  const rowH = gridH / 12
+  const zeroColW = gridW / 13
+  const numGridX = gridX + zeroColW
+  const numGridW = gridW - zeroColW
+  const colW = numGridW / 12
+  const rowH = 52
+  const dozenH = 44
+  const evenH = 44
 
   const stroke = () => {
     ctx.strokeStyle = 'rgba(232, 224, 200, 0.9)'
@@ -74,8 +77,8 @@ export function createRouletteLayoutTexture(): THREE.CanvasTexture {
     ctx.fillText(String(n), x + cw / 2, y + ch / 2)
   }
 
-  drawCell(gridX, gridY, gridW / 2 - 1, zeroH, '0')
-  drawCell(gridX + gridW / 2 + 1, gridY, gridW / 2 - 1, zeroH, '00')
+  // 0 spans the three number rows on the left (matches the betting UI)
+  drawCell(gridX, gridY, zeroColW - 1, rowH * 3, '0')
 
   const nums = [
     [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
@@ -83,52 +86,51 @@ export function createRouletteLayoutTexture(): THREE.CanvasTexture {
     [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
   ]
 
-  const numTop = gridY + zeroH
-  for (let c = 0; c < 3; c++) {
-    for (let r = 0; r < 12; r++) {
-      drawCell(gridX + c * colW, numTop + r * rowH, colW, rowH, nums[c][r])
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 12; c++) {
+      drawCell(numGridX + c * colW, gridY + r * rowH, colW - 1, rowH, nums[r][c])
     }
   }
 
-  // Outside bets
-  const outY = h - margin - 48
+  // Outside bets — dozens then even-money (same order as the UI board)
+  const dozenY = gridY + rowH * 3 + 4
   const sections = [
     { label: '1st 12', color: '#0d6e40' },
     { label: '2nd 12', color: '#0d6e40' },
     { label: '3rd 12', color: '#0d6e40' },
   ]
-  const secW = gridW / 3
+  const secW = numGridW / 3
   sections.forEach((s, i) => {
-    const x = gridX + i * secW
+    const x = numGridX + i * secW
     ctx.fillStyle = s.color
-    ctx.fillRect(x, outY, secW - 2, 48)
+    ctx.fillRect(x, dozenY, secW - 2, dozenH)
     stroke()
-    ctx.strokeRect(x, outY, secW - 2, 48)
+    ctx.strokeRect(x, dozenY, secW - 2, dozenH)
     ctx.fillStyle = '#e8e0c8'
     ctx.font = 'bold 16px system-ui, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(s.label, x + secW / 2, outY + 24)
+    ctx.fillText(s.label, x + secW / 2, dozenY + dozenH / 2)
   })
 
-  const barY = outY - 34
+  const evenY = dozenY + dozenH + 4
   const bars = [
-    { label: '1–18', w: gridW * 0.2 },
-    { label: 'EVEN', w: gridW * 0.15 },
-    { label: 'RED', w: gridW * 0.15, fill: '#b91c1c' },
-    { label: 'BLACK', w: gridW * 0.15, fill: '#141414' },
-    { label: 'ODD', w: gridW * 0.15 },
-    { label: '19–36', w: gridW * 0.2 },
+    { label: '1–18', w: numGridW * 0.2 },
+    { label: 'EVEN', w: numGridW * 0.15 },
+    { label: 'RED', w: numGridW * 0.15, fill: '#b91c1c' },
+    { label: 'BLACK', w: numGridW * 0.15, fill: '#141414' },
+    { label: 'ODD', w: numGridW * 0.15 },
+    { label: '19–36', w: numGridW * 0.2 },
   ]
-  let bx = gridX
+  let bx = numGridX
   for (const bar of bars) {
     ctx.fillStyle = bar.fill ?? '#0d6e40'
-    ctx.fillRect(bx, barY, bar.w - 2, 30)
+    ctx.fillRect(bx, evenY, bar.w - 2, evenH)
     stroke()
-    ctx.strokeRect(bx, barY, bar.w - 2, 30)
+    ctx.strokeRect(bx, evenY, bar.w - 2, evenH)
     ctx.fillStyle = '#e8e0c8'
     ctx.font = 'bold 13px system-ui, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(bar.label, bx + bar.w / 2, barY + 15)
+    ctx.fillText(bar.label, bx + bar.w / 2, evenY + evenH / 2)
     bx += bar.w
   }
 
